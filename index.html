@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLB Pickleball Ecohome Nhơn Bình</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f7fee7',
+                            100: '#ecfccb',
+                            400: '#a3e635',
+                            500: '#84cc16',
+                            600: '#65a30d',
+                            700: '#4d7c0f',
+                            dark: '#0f172a',
+                            card: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #84cc16;
+        }
+        
+        /* Bracket Connector Lines */
+        .bracket-line {
+            position: relative;
+        }
+        .bracket-line::after {
+            content: '';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            width: 1rem;
+            height: 2px;
+            background-color: #475569;
+        }
+        .bracket-match {
+            transition: all 0.2s ease;
+        }
+        .bracket-match:hover {
+            border-color: #84cc16;
+            box-shadow: 0 0 15px rgba(132, 204, 22, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-black">
+
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Club Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-600 to-lime-400 p-0.5 shadow-lg shadow-brand-500/20">
+                        <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                            <i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-extrabold text-xl sm:text-2xl tracking-tight bg-gradient-to-r from-white via-slate-200 to-brand-400 bg-clip-text text-transparent">
+                                ECOHOME NHƠN BÌNH
+                            </h1>
+                            <span class="bg-brand-500/20 text-brand-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-brand-500/30">PICKLEBALL CLUB</span>
+                        </div>
+                        <p class="text-xs text-slate-400 font-medium hidden sm:block">Hệ thống Quản lý & Tổ chức Đấu Chuyên Nghiệp</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs & Admin Status -->
+                <div class="flex items-center gap-3">
+                    <nav class="hidden md:flex bg-slate-950 p-1.5 rounded-xl border border-slate-800/80">
+                        <button onclick="switchTab('members')" id="tab-members" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-brand-500 text-slate-950 shadow-md">
+                            <i class="fa-solid fa-users mr-2"></i>Thành Viên
+                        </button>
+                        <button onclick="switchTab('social')" id="tab-social" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-shuffle mr-2"></i>Bốc Thăm Giao Lưu
+                        </button>
+                        <button onclick="switchTab('bracket')" id="tab-bracket" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-sitemap mr-2"></i>Sơ Đồ Giải Đấu
+                        </button>
+                    </nav>
+
+                    <!-- Admin Auth Button -->
+                    <button id="adminBtn" onclick="toggleAdminModal()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-700 transition">
+                        <i id="adminIcon" class="fa-solid fa-lock text-slate-400"></i>
+                        <span id="adminText">Đăng nhập Admin</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Navigation Bar -->
+            <div class="flex md:hidden border-t border-slate-800/60 py-2 justify-around text-xs font-semibold">
+                <button onclick="switchTab('members')" id="mtab-members" class="py-2 px-3 rounded-lg text-brand-400 bg-brand-500/10">Thành Viên</button>
+                <button onclick="switchTab('social')" id="mtab-social" class="py-2 px-3 rounded-lg text-slate-400">Bốc Thăm</button>
+                <button onclick="switchTab('bracket')" id="mtab-bracket" class="py-2 px-3 rounded-lg text-slate-400">Sơ Đồ Giải</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        
+        <!-- Toast Notification Area -->
+        <div id="toastContainer" class="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <!-- ================= TAB 1: MEMBERS MANAGEMENT ================= -->
+        <section id="members-section" class="space-y-6">
+            <!-- Header Bar -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        Danh Sách Thành Viên <span id="memberCountBadge" class="text-xs bg-slate-800 text-brand-400 px-2.5 py-1 rounded-full font-mono border border-slate-700">0</span>
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-1">Cập nhật chỉ số DUPR, thứ hạng và thông tin chi tiết của CLB Ecohome Nhơn Bình</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="renderMembers()" placeholder="Tìm theo tên, SĐT, chỉ số..." class="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-brand-500 transition">
+                    </div>
+                    <button id="addMemberBtn" onclick="openMemberModal()" class="hidden bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-lg shadow-brand-500/20 transition flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>Thêm Thành Viên
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-medium">Tổng Thành Viên</p>
+                    <p id="statTotal" class="text-2xl font-extrabold text-white mt-1">0</p>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-medium">Chỉ Số DUPR Trung Bình</p>
+                    <p id="statAvgRating" class="text-2xl font-extrabold text-brand-400 mt-1">0.0</p>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-medium">Thành Viên Nam</p>
+                    <p id="statMale" class="text-2xl font-extrabold text-blue-400 mt-1">0</p>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-medium">Thành Viên Nữ</p>
+                    <p id="statFemale" class="text-2xl font-extrabold text-pink-400 mt-1">0</p>
+                </div>
+            </div>
+
+            <!-- Members Grid -->
+            <div id="membersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                <!-- Member Cards Dynamic Ingestion -->
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: RANDOM MATCH GENERATOR ================= -->
+        <section id="social-section" class="hidden space-y-6">
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-shuffle text-brand-400"></i> Bốc Thăm Ghép Cặp Giao Lưu
+                        </h2>
+                        <p class="text-sm text-slate-400 mt-1">Hệ thống tạo ngẫu nhiên các cặp đấu đánh Đôi/Đơn công bằng, xoay vòng sân đấu</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="selectAllMembersForSocial(true)" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition">Chọn tất cả</button>
+                        <button onclick="selectAllMembersForSocial(false)" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700 transition">Bỏ chọn</button>
+                        <button onclick="generateRandomSocialMatches()" class="bg-gradient-to-r from-brand-500 to-lime-400 hover:opacity-90 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl text-sm shadow-lg shadow-brand-500/20 transition flex items-center gap-2">
+                            <i class="fa-solid fa-dice"></i> Bốc Thăm Ngẫu Nhiên
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Court & Format Configuration -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-800/80">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Số Lượng Sân</label>
+                        <select id="socialCourtCount" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                            <option value="1">1 Sân (4 người chơi)</option>
+                            <option value="2" selected>2 Sân (8 người chơi)</option>
+                            <option value="3">3 Sân (12 người chơi)</option>
+                            <option value="4">4 Sân (16 người chơi)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Thể Thức Đấu</label>
+                        <select id="socialMatchType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                            <option value="doubles">Đánh Đôi (2 vs 2)</option>
+                            <option value="singles">Đánh Đơn (1 vs 1)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Cân Bằng Chỉ Số DUPR</label>
+                        <select id="socialBalanceMode" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                            <option value="random">Ngẫu nhiên tuyệt đối</option>
+                            <option value="balanced">Cân bằng trình độ (DUPR tương đương)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Participant Picker Checklist -->
+                <div class="mt-6">
+                    <label class="block text-xs font-semibold text-slate-400 mb-2">Chọn Thành Viên Tham Gia Lượt Bốc Thăm:</label>
+                    <div id="socialMemberChecklist" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-3 bg-slate-950 rounded-xl border border-slate-800/80">
+                        <!-- Checked items go here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Results Display -->
+            <div id="socialMatchResults" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="col-span-full text-center py-12 bg-slate-900/30 rounded-2xl border border-dashed border-slate-800">
+                    <i class="fa-solid fa-dice-three text-4xl text-slate-600 mb-3"></i>
+                    <p class="text-slate-400 font-medium text-sm">Chưa có lượt bốc thăm nào. Tích chọn thành viên và bấm "Bốc Thăm Ngẫu Nhiên".</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: TOURNAMENT BRACKET ================= -->
+        <section id="bracket-section" class="hidden space-y-6">
+            <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 backdrop-blur-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> Sơ Đồ Thi Đấu Giải Nội Bộ
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-1">Cây thi đấu Loại Trực Tiếp (Knockout Bracket) tính điểm trực tiếp</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="bracketPlayerCount" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <option value="4">Giải 4 Đội / VĐV</option>
+                        <option value="8" selected>Giải 8 Đội / VĐV</option>
+                        <option value="16">Giải 16 Đội / VĐV</option>
+                    </select>
+                    <button id="setupBracketBtn" onclick="generateNewBracketModal()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition flex items-center gap-2">
+                        <i class="fa-solid fa-diagram-project"></i> Tạo Sơ Đồ Mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Bracket Tree Canvas Container -->
+            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 overflow-x-auto min-h-[500px]">
+                <div id="bracketTreeContainer" class="flex items-center min-w-[800px] justify-between gap-12 py-6">
+                    <!-- Dynamic Bracket Columns (Quarter-Finals -> Semi-Finals -> Finals -> Champion) -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-950 border-t border-slate-900 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-semibold text-slate-400">CLB Pickleball Ecohome Nhơn Bình - Quy Nhơn</p>
+            <p class="mt-1">Sân chơi thể thao đẳng cấp • Giao lưu học hỏi • Kết nối đam mê</p>
+            <p class="mt-2 text-[10px] text-slate-600">Phát triển cho CLB Ecohome Nhơn Bình © 2026</p>
+        </div>
+    </footer>
+
+    
+    <!-- 1. ADMIN LOGIN MODAL -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-brand-500/20">
+                    <i class="fa-solid fa-user-shield text-brand-400 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Xác Thực Quản Trị Viên</h3>
+                <p class="text-xs text-slate-400 mt-1">Nhập mật khẩu Admin và nhấn ENTER để kích hoạt quyền quản lý</p>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Mật khẩu Admin</label>
+                    <div class="relative">
+                        <input type="password" id="adminPasswordInput" required placeholder="Nhập mật khẩu và nhấn Enter..." onkeydown="if(event.key === 'Enter'){ event.preventDefault(); handleAdminLogin(event); }" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500 tracking-wider">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+                    Đăng Nhập Quản Trị (Enter)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. ADD/EDIT MEMBER MODAL -->
+    <div id="memberModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeMemberModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <h3 id="memberModalTitle" class="text-xl font-bold text-white mb-4">Thêm Thành Viên Mới</h3>
+
+            <form onsubmit="saveMember(event)" class="space-y-4">
+                <input type="hidden" id="memberId">
+                
+                <!-- Avatar Preview & Input -->
+                <div class="flex items-center gap-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <div class="w-16 h-16 rounded-full bg-slate-800 overflow-hidden relative group flex-shrink-0 border border-slate-700">
+                        <img id="avatarPreview" src="https://placehold.co/200x200/1e293b/84cc16?text=Avatar" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Ảnh Đại Diện (URL hoặc Tải lên)</label>
+                        <input type="text" id="memberAvatarUrl" oninput="updateAvatarPreview(this.value)" placeholder="https://link-anh.jpg" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none mb-1">
+                        <input type="file" id="memberAvatarFile" accept="image/*" onchange="handleFileUpload(event)" class="text-[10px] text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Họ và Tên *</label>
+                    <input type="text" id="memberName" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Chỉ Số DUPR / Trình Độ *</label>
+                        <input type="number" step="0.05" min="1.0" max="6.0" id="memberRating" required placeholder="3.5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Giới Tính</label>
+                        <select id="memberGender" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Số Điện Thoại / Zalo</label>
+                        <input type="text" id="memberPhone" placeholder="0901234567" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Chức vụ / Vị trí</label>
+                        <select id="memberRole" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                            <option value="Thành viên">Thành viên</option>
+                            <option value="Ban Quản Lý">Ban Quản Lý</option>
+                            <option value="Huấn Luận Viên">Huấn Luận Viên</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-slate-800">
+                    <button type="button" onclick="closeMemberModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-xl text-sm transition">Hủy</button>
+                    <button type="submit" class="flex-1 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold py-2 rounded-xl text-sm transition shadow-lg shadow-brand-500/20">Lưu Thành Viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. SCORE INPUT MODAL FOR BRACKET -->
+    <div id="scoreModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
+            <button onclick="closeScoreModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <h3 class="text-lg font-bold text-white mb-1">Cập Nhật Tỷ Số Trận Đấu</h3>
+            <p class="text-xs text-slate-400 mb-4">Nhập điểm số thực tế để quyết định người thắng vào vòng trong</p>
+
+            <form onsubmit="saveMatchScore(event)" class="space-y-4">
+                <input type="hidden" id="matchRoundIdx">
+                <input type="hidden" id="matchMatchIdx">
+
+                <div class="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <div class="flex items-center justify-between gap-3">
+                        <span id="player1Name" class="text-sm font-semibold text-white truncate max-w-[150px]">Đội A</span>
+                        <input type="number" min="0" max="30" id="score1" required class="w-16 bg-slate-900 border border-slate-700 text-center text-lg font-bold text-brand-400 rounded-lg py-1">
+                    </div>
+                    <div class="border-t border-slate-800 my-2"></div>
+                    <div class="flex items-center justify-between gap-3">
+                        <span id="player2Name" class="text-sm font-semibold text-white truncate max-w-[150px]">Đội B</span>
+                        <input type="number" min="0" max="30" id="score2" required class="w-16 bg-slate-900 border border-slate-700 text-center text-lg font-bold text-brand-400 rounded-lg py-1">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm transition shadow-lg shadow-brand-500/20">
+                    Lưu Tỷ Số & Tiến Vòng
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* ================= STATE MANAGEMENT ================= */
+        const ADMIN_PASSWORD_HASH = "215151365"; // Admin password requirement
+        let isAdminLoggedIn = false;
+        let currentTab = 'members';
+
+        // Initial Sample Data for CLB Pickleball Ecohome Nhơn Bình
+        let membersData = [
+            { id: 1, name: "Nguyễn Văn Hùng", rating: 4.2, gender: "Nam", phone: "0905123456", role: "Ban Quản Lý", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
+            { id: 2, name: "Trần Thị Minh Anh", rating: 3.5, gender: "Nữ", phone: "0914888999", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150" },
+            { id: 3, name: "Lê Hoàng Đức", rating: 4.0, gender: "Nam", phone: "0983112233", role: "Huấn Luận Viên", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" },
+            { id: 4, name: "Phạm Hải Yến", rating: 3.2, gender: "Nữ", phone: "0935445566", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150" },
+            { id: 5, name: "Đặng Quốc Bảo", rating: 3.8, gender: "Nam", phone: "0903778899", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
+            { id: 6, name: "Võ Tuyết Nhi", rating: 2.8, gender: "Nữ", phone: "0977223344", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
+            { id: 7, name: "Huỳnh Tấn Phát", rating: 4.5, gender: "Nam", phone: "0913990011", role: "Ban Quản Lý", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" },
+            { id: 8, name: "Bùi Thị Thảo", rating: 3.0, gender: "Nữ", phone: "0908112244", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150" }
+        ];
+
+        // Tournament Bracket Data Structure
+        let tournamentBracket = {
+            playerCount: 8,
+            rounds: [
+                // Round 1 (Tứ kết)
+                [
+                    { id: 101, p1: "Nguyễn Văn Hùng", p2: "Bùi Thị Thảo", score1: 11, score2: 6, winner: "Nguyễn Văn Hùng" },
+                    { id: 102, p1: "Phạm Hải Yến", p2: "Đặng Quốc Bảo", score1: 8, score2: 11, winner: "Đặng Quốc Bảo" },
+                    { id: 103, p1: "Lê Hoàng Đức", p2: "Võ Tuyết Nhi", score1: 11, score2: 4, winner: "Lê Hoàng Đức" },
+                    { id: 104, p1: "Trần Thị Minh Anh", p2: "Huỳnh Tấn Phát", score1: 5, score2: 11, winner: "Huỳnh Tấn Phát" }
+                ],
+                // Round 2 (Bán kết)
+                [
+                    { id: 201, p1: "Nguyễn Văn Hùng", p2: "Đặng Quốc Bảo", score1: 11, score2: 9, winner: "Nguyễn Văn Hùng" },
+                    { id: 202, p1: "Lê Hoàng Đức", p2: "Huỳnh Tấn Phát", score1: 11, score2: 13, winner: "Huỳnh Tấn Phát" }
+                ],
+                // Round 3 (Chung kết)
+                [
+                    { id: 301, p1: "Nguyễn Văn Hùng", p2: "Huỳnh Tấn Phát", score1: null, score2: null, winner: null }
+                ]
+            ],
+            champion: null
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            renderMembers();
+            renderSocialChecklist();
+            renderBracket();
+            updateStats();
+        });
+
+        function saveToLocalStorage() {
+            localStorage.setItem('ecohome_members', JSON.stringify(membersData));
+            localStorage.setItem('ecohome_bracket', JSON.stringify(tournamentBracket));
+        }
+
+        function loadFromLocalStorage() {
+            const savedMembers = localStorage.getItem('ecohome_members');
+            if (savedMembers) {
+                try { membersData = JSON.parse(savedMembers); } catch(e){}
+            }
+            const savedBracket = localStorage.getItem('ecohome_bracket');
+            if (savedBracket) {
+                try { tournamentBracket = JSON.parse(savedBracket); } catch(e){}
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-brand-500 text-slate-950' : (type === 'error' ? 'bg-red-500 text-white' : 'bg-slate-800 text-white');
+            const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle');
+            
+            toast.className = `${bgColor} px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 font-semibold text-xs transition-all duration-300 transform translate-x-full pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['members', 'social', 'bracket'].forEach(t => {
+                const section = document.getElementById(`${t}-section`);
+                const btn = document.getElementById(`tab-${t}`);
+                const mbtn = document.getElementById(`mtab-${t}`);
+                if (t === tab) {
+                    section.classList.remove('hidden');
+                    btn?.classList.add('bg-brand-500', 'text-slate-950', 'shadow-md');
+                    btn?.classList.remove('text-slate-400');
+                    mbtn?.classList.add('text-brand-400', 'bg-brand-500/10');
+                    mbtn?.classList.remove('text-slate-400');
+                } else {
+                    section.classList.add('hidden');
+                    btn?.classList.remove('bg-brand-500', 'text-slate-950', 'shadow-md');
+                    btn?.classList.add('text-slate-400');
+                    mbtn?.classList.remove('text-brand-400', 'bg-brand-500/10');
+                    mbtn?.classList.add('text-slate-400');
+                }
+            });
+            if(tab === 'social') renderSocialChecklist();
+            if(tab === 'bracket') renderBracket();
+        }
+
+        function toggleAdminModal() {
+            if (isAdminLoggedIn) {
+                // Logout Admin
+                isAdminLoggedIn = false;
+                updateAdminUI();
+                showToast("Đã thoát chế độ Admin", "info");
+            } else {
+                document.getElementById('adminModal').classList.toggle('hidden');
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const input = document.getElementById('adminPasswordInput').value;
+            if (input === ADMIN_PASSWORD_HASH) {
+                isAdminLoggedIn = true;
+                updateAdminUI();
+                toggleAdminModal();
+                document.getElementById('adminPasswordInput').value = '';
+                showToast("Đăng nhập Admin thành công!");
+            } else {
+                showToast("Sai mật khẩu Admin!", "error");
+            }
+        }
+
+        function updateAdminUI() {
+            const adminBtn = document.getElementById('adminBtn');
+            const adminIcon = document.getElementById('adminIcon');
+            const adminText = document.getElementById('adminText');
+            const addMemberBtn = document.getElementById('addMemberBtn');
+            const setupBracketBtn = document.getElementById('setupBracketBtn');
+
+            if (isAdminLoggedIn) {
+                adminBtn.classList.replace('bg-slate-800', 'bg-brand-500');
+                adminBtn.classList.replace('text-slate-200', 'text-slate-950');
+                adminIcon.className = "fa-solid fa-lock-open text-slate-950";
+                adminText.innerText = "Thoát Admin";
+                addMemberBtn.classList.remove('hidden');
+                setupBracketBtn.classList.remove('hidden');
+            } else {
+                adminBtn.classList.replace('bg-brand-500', 'bg-slate-800');
+                adminBtn.classList.replace('text-slate-950', 'text-slate-200');
+                adminIcon.className = "fa-solid fa-lock text-slate-400";
+                adminText.innerText = "Đăng nhập Admin";
+                addMemberBtn.classList.add('hidden');
+                setupBracketBtn.classList.add('hidden');
+            }
+            renderMembers();
+            renderBracket();
+        }
+
+        function updateStats() {
+            const total = membersData.length;
+            const avg = total > 0 ? (membersData.reduce((acc, m) => acc + parseFloat(m.rating), 0) / total).toFixed(2) : "0.0";
+            const male = membersData.filter(m => m.gender === 'Nam').length;
+            const female = membersData.filter(m => m.gender === 'Nữ').length;
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statAvgRating').innerText = avg;
+            document.getElementById('statMale').innerText = male;
+            document.getElementById('statFemale').innerText = female;
+            document.getElementById('memberCountBadge').innerText = total;
+        }
+
+        function renderMembers() {
+            const grid = document.getElementById('membersGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filtered = membersData.filter(m => 
+                m.name.toLowerCase().includes(search) || 
+                m.phone.includes(search) || 
+                m.rating.toString().includes(search)
+            );
+
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-500">
+                        <i class="fa-solid fa-user-slash text-4xl mb-2"></i>
+                        <p>Không tìm thấy thành viên nào phù hợp.</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(m => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between hover:border-slate-700 transition group relative overflow-hidden";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <img src="${m.avatar || 'https://placehold.co/150'}" onerror="this.src='https://placehold.co/150'" class="w-12 h-12 rounded-xl object-cover border border-slate-700">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm group-hover:text-brand-400 transition truncate max-w-[140px]">${m.name}</h4>
+                                    <span class="text-[10px] font-semibold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">${m.role || 'Thành viên'}</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-extrabold bg-brand-500/10 text-brand-400 border border-brand-500/20 px-2 py-1 rounded-lg font-mono">DUPR ${parseFloat(m.rating).toFixed(1)}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                            <div><i class="fa-solid fa-venus-mars text-slate-500 mr-1.5"></i>${m.gender}</div>
+                            <div><i class="fa-solid fa-phone text-slate-500 mr-1.5"></i>${m.phone || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    ${isAdminLoggedIn ? `
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end gap-2">
+                        <button onclick="editMember(${m.id})" class="text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition"><i class="fa-solid fa-pen"></i> Sửa</button>
+                        <button onclick="deleteMember(${m.id})" class="text-xs text-red-400 hover:text-red-300 bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i> Xóa</button>
+                    </div>
+                    ` : ''}
+                `;
+                grid.appendChild(card);
+            });
+
+            updateStats();
+        }
+
+        function openMemberModal(member = null) {
+            document.getElementById('memberModal').classList.remove('hidden');
+            if (member) {
+                document.getElementById('memberModalTitle').innerText = "Cập Nhật Thành Viên";
+                document.getElementById('memberId').value = member.id;
+                document.getElementById('memberName').value = member.name;
+                document.getElementById('memberRating').value = member.rating;
+                document.getElementById('memberGender').value = member.gender;
+                document.getElementById('memberPhone').value = member.phone || '';
+                document.getElementById('memberRole').value = member.role || 'Thành viên';
+                document.getElementById('memberAvatarUrl').value = member.avatar || '';
+                document.getElementById('avatarPreview').src = member.avatar || 'https://placehold.co/200';
+            } else {
+                document.getElementById('memberModalTitle').innerText = "Thêm Thành Viên Mới";
+                document.getElementById('memberId').value = '';
+                document.getElementById('memberName').value = '';
+                document.getElementById('memberRating').value = '3.0';
+                document.getElementById('memberGender').value = 'Nam';
+                document.getElementById('memberPhone').value = '';
+                document.getElementById('memberRole').value = 'Thành viên';
+                document.getElementById('memberAvatarUrl').value = '';
+                document.getElementById('avatarPreview').src = 'https://placehold.co/200';
+            }
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.add('hidden');
+        }
+
+        function updateAvatarPreview(url) {
+            if(url) document.getElementById('avatarPreview').src = url;
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('avatarPreview').src = evt.target.result;
+                    document.getElementById('memberAvatarUrl').value = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveMember(e) {
+            e.preventDefault();
+            const id = document.getElementById('memberId').value;
+            const name = document.getElementById('memberName').value.trim();
+            const rating = parseFloat(document.getElementById('memberRating').value);
+            const gender = document.getElementById('memberGender').value;
+            const phone = document.getElementById('memberPhone').value.trim();
+            const role = document.getElementById('memberRole').value;
+            const avatar = document.getElementById('memberAvatarUrl').value || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(name)}`;
+
+            if (id) {
+                // Edit existing
+                const index = membersData.findIndex(m => m.id == id);
+                if (index !== -1) {
+                    membersData[index] = { ...membersData[index], name, rating, gender, phone, role, avatar };
+                    showToast("Cập nhật thành viên thành công!");
+                }
+            } else {
+                // Create new
+                const newMember = {
+                    id: Date.now(),
+                    name, rating, gender, phone, role, avatar
+                };
+                membersData.push(newMember);
+                showToast("Thêm thành viên mới thành công!");
+            }
+
+            saveToLocalStorage();
+            renderMembers();
+            closeMemberModal();
+        }
+
+        function editMember(id) {
+            const member = membersData.find(m => m.id === id);
+            if (member) openMemberModal(member);
+        }
+
+        function deleteMember(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa thành viên này khỏi danh sách?")) {
+                membersData = membersData.filter(m => m.id !== id);
+                saveToLocalStorage();
+                renderMembers();
+                showToast("Đã xóa thành viên", "info");
+            }
+        }
+
+        function renderSocialChecklist() {
+            const container = document.getElementById('socialMemberChecklist');
+            container.innerHTML = '';
+
+            membersData.forEach(m => {
+                const label = document.createElement('label');
+                label.className = "flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700 transition text-xs text-slate-200 select-none";
+                label.innerHTML = `
+                    <input type="checkbox" value="${m.id}" checked class="social-member-checkbox accent-brand-500 rounded">
+                    <span>${m.name}</span>
+                    <span class="text-[10px] text-brand-400 font-mono">(${m.rating})</span>
+                `;
+                container.appendChild(label);
+            });
+        }
+
+        function selectAllMembersForSocial(select) {
+            document.querySelectorAll('.social-member-checkbox').forEach(cb => cb.checked = select);
+        }
+
+        function generateRandomSocialMatches() {
+            const checkboxes = document.querySelectorAll('.social-member-checkbox:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id));
+
+            if (selectedPlayers.length < 4) {
+                showToast("Cần ít nhất 4 người chơi để bốc thăm trận đấu!", "error");
+                return;
+            }
+
+            const courtCount = parseInt(document.getElementById('socialCourtCount').value);
+            const matchType = document.getElementById('socialMatchType').value; // 'doubles' or 'singles'
+            const balanceMode = document.getElementById('socialBalanceMode').value;
+
+            // Shuffle players
+            selectedPlayers = selectedPlayers.sort(() => Math.random() - 0.5);
+
+            if (balanceMode === 'balanced') {
+                selectedPlayers.sort((a,b) => b.rating - a.rating);
+            }
+
+            const playersPerMatch = matchType === 'doubles' ? 4 : 2;
+            const resultsContainer = document.getElementById('socialMatchResults');
+            resultsContainer.innerHTML = '';
+
+            let playerIdx = 0;
+
+            for (let c = 1; c <= courtCount; c++) {
+                if (playerIdx + playersPerMatch > selectedPlayers.length) break;
+
+                const courtMatchPlayers = selectedPlayers.slice(playerIdx, playerIdx + playersPerMatch);
+                playerIdx += playersPerMatch;
+
+                let teamA, teamB;
+                if (matchType === 'doubles') {
+                    // Balance Team A & Team B inside the 4 selected
+                    teamA = [courtMatchPlayers[0], courtMatchPlayers[3]];
+                    teamB = [courtMatchPlayers[1], courtMatchPlayers[2]];
+                } else {
+                    teamA = [courtMatchPlayers[0]];
+                    teamB = [courtMatchPlayers[1]];
+                }
+
+                const courtCard = document.createElement('div');
+                courtCard.className = "bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden";
+                courtCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                        <span class="text-sm font-extrabold text-brand-400 flex items-center gap-2">
+                            <i class="fa-solid fa-border-all"></i> SÂN ĐẤU SỐ ${c}
+                        </span>
+                        <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full border border-slate-700">${matchType === 'doubles' ? 'Trận Đôi' : 'Trận Đơn'}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 items-center relative">
+                        <!-- Team A -->
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Đội A</span>
+                            ${teamA.map(p => `
+                                <div class="font-bold text-white text-xs py-0.5">${p.name} <span class="text-brand-400 font-mono text-[10px]">(${p.rating})</span></div>
+                            `).join('')}
+                        </div>
+
+                        <!-- VS Badge -->
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-black text-brand-400 z-10 shadow">VS</div>
+
+                        <!-- Team B -->
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Đội B</span>
+                            ${teamB.map(p => `
+                                <div class="font-bold text-white text-xs py-0.5">${p.name} <span class="text-brand-400 font-mono text-[10px]">(${p.rating})</span></div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                resultsContainer.appendChild(courtCard);
+            }
+
+            // Waiting players list
+            const leftoverPlayers = selectedPlayers.slice(playerIdx);
+            if (leftoverPlayers.length > 0) {
+                const waitingCard = document.createElement('div');
+                waitingCard.className = "col-span-full bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4";
+                waitingCard.innerHTML = `
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-amber-400"></i> Danh Sách Chờ Lượt Tiếp Theo (${leftoverPlayers.length})
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${leftoverPlayers.map(p => `
+                            <span class="bg-slate-900 border border-slate-800 text-slate-300 text-xs px-3 py-1 rounded-lg">${p.name} (${p.rating})</span>
+                        `).join('')}
+                    </div>
+                `;
+                resultsContainer.appendChild(waitingCard);
+            }
+
+            showToast("Đã bốc thăm ghép cặp ngẫu nhiên thành công!");
+        }
+
+        function renderBracket() {
+            const container = document.getElementById('bracketTreeContainer');
+            container.innerHTML = '';
+
+            const roundTitles = ["Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
+
+            tournamentBracket.rounds.forEach((roundMatches, roundIdx) => {
+                const column = document.createElement('div');
+                column.className = "flex flex-col justify-around h-full space-y-8 flex-1 min-w-[220px]";
+
+                const roundHeader = document.createElement('h4');
+                roundHeader.className = "text-center text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 bg-slate-950 py-1.5 rounded-lg border border-slate-800/80";
+                roundHeader.innerText = roundTitles[roundIdx] || `Vòng ${roundIdx + 1}`;
+                column.appendChild(roundHeader);
+
+                roundMatches.forEach((match, matchIdx) => {
+                    const matchCard = document.createElement('div');
+                    matchCard.className = "bracket-match bg-slate-900 border border-slate-800 rounded-xl p-3 relative cursor-pointer shadow-md";
+                    
+                    if (isAdminLoggedIn) {
+                        matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
+                    }
+
+                    const isP1Winner = match.winner && match.winner === match.p1;
+                    const isP2Winner = match.winner && match.winner === match.p2;
+
+                    matchCard.innerHTML = `
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center p-1.5 rounded-lg ${isP1Winner ? 'bg-brand-500/10 border border-brand-500/30' : 'bg-slate-950'}">
+                                <span class="text-xs font-semibold ${isP1Winner ? 'text-brand-400 font-bold' : 'text-slate-300'} truncate max-w-[130px]">
+                                    ${match.p1 || '---'}
+                                </span>
+                                <span class="text-xs font-mono font-bold ${isP1Winner ? 'text-brand-400' : 'text-slate-500'}">
+                                    ${match.score1 !== null ? match.score1 : '-'}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center p-1.5 rounded-lg ${isP2Winner ? 'bg-brand-500/10 border border-brand-500/30' : 'bg-slate-950'}">
+                                <span class="text-xs font-semibold ${isP2Winner ? 'text-brand-400 font-bold' : 'text-slate-300'} truncate max-w-[130px]">
+                                    ${match.p2 || '---'}
+                                </span>
+                                <span class="text-xs font-mono font-bold ${isP2Winner ? 'text-brand-400' : 'text-slate-500'}">
+                                    ${match.score2 !== null ? match.score2 : '-'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    column.appendChild(matchCard);
+                });
+
+                container.appendChild(column);
+            });
+
+            // Champion Column
+            const champCol = document.createElement('div');
+            champCol.className = "flex flex-col items-center justify-center min-w-[180px]";
+            champCol.innerHTML = `
+                <div class="text-center p-6 bg-gradient-to-b from-amber-500/10 to-slate-900 border border-amber-500/30 rounded-2xl w-full">
+                    <i class="fa-solid fa-trophy text-4xl text-amber-400 mb-2 animate-bounce"></i>
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-widest mb-1">QUÁN QUÂN</h4>
+                    <p class="text-base font-extrabold text-white truncate">${tournamentBracket.champion || 'Chưa xác định'}</p>
+                </div>
+            `;
+            container.appendChild(champCol);
+        }
+
+        function openScoreModal(roundIdx, matchIdx) {
+            const match = tournamentBracket.rounds[roundIdx][matchIdx];
+            if (!match.p1 || !match.p2 || match.p1 === '---' || match.p2 === '---') {
+                showToast("Chưa đủ 2 đội tham gia trận đấu này!", "error");
+                return;
+            }
+
+            document.getElementById('matchRoundIdx').value = roundIdx;
+            document.getElementById('matchMatchIdx').value = matchIdx;
+            document.getElementById('player1Name').innerText = match.p1;
+            document.getElementById('player2Name').innerText = match.p2;
+            document.getElementById('score1').value = match.score1 !== null ? match.score1 : 0;
+            document.getElementById('score2').value = match.score2 !== null ? match.score2 : 0;
+
+            document.getElementById('scoreModal').classList.remove('hidden');
+        }
+
+        function closeScoreModal() {
+            document.getElementById('scoreModal').classList.add('hidden');
+        }
+
+        function saveMatchScore(e) {
+            e.preventDefault();
+            const roundIdx = parseInt(document.getElementById('matchRoundIdx').value);
+            const matchIdx = parseInt(document.getElementById('matchMatchIdx').value);
+            const s1 = parseInt(document.getElementById('score1').value);
+            const s2 = parseInt(document.getElementById('score2').value);
+
+            if (s1 === s2) {
+                showToast("Tỷ số Pickleball không được hòa!", "error");
+                return;
+            }
+
+            const match = tournamentBracket.rounds[roundIdx][matchIdx];
+            match.score1 = s1;
+            match.score2 = s2;
+            match.winner = s1 > s2 ? match.p1 : match.p2;
+
+            // Advance winner to next round
+            if (roundIdx + 1 < tournamentBracket.rounds.length) {
+                const nextMatchIdx = Math.floor(matchIdx / 2);
+                const nextMatch = tournamentBracket.rounds[roundIdx + 1][nextMatchIdx];
+                if (matchIdx % 2 === 0) {
+                    nextMatch.p1 = match.winner;
+                } else {
+                    nextMatch.p2 = match.winner;
+                }
+            } else {
+                // Final round winner -> Champion!
+                tournamentBracket.champion = match.winner;
+            }
+
+            saveToLocalStorage();
+            renderBracket();
+            closeScoreModal();
+            showToast(`Đã cập nhật chiến thắng cho ${match.winner}!`);
+        }
+
+        function generateNewBracketModal() {
+            if (membersData.length < 4) {
+                showToast("Cần ít nhất 4 thành viên để tạo sơ đồ thi đấu!", "error");
+                return;
+            }
+
+            if (confirm("Bạn có muốn tạo lại Sơ đồ giải đấu mới ngẫu nhiên từ danh sách thành viên hiện tại?")) {
+                const shuffled = [...membersData].sort(() => Math.random() - 0.5);
+                
+                tournamentBracket = {
+                    playerCount: 8,
+                    rounds: [
+                        [
+                            { id: 101, p1: shuffled[0]?.name || '---', p2: shuffled[1]?.name || '---', score1: null, score2: null, winner: null },
+                            { id: 102, p1: shuffled[2]?.name || '---', p2: shuffled[3]?.name || '---', score1: null, score2: null, winner: null },
+                            { id: 103, p1: shuffled[4]?.name || '---', p2: shuffled[5]?.name || '---', score1: null, score2: null, winner: null },
+                            { id: 104, p1: shuffled[6]?.name || '---', p2: shuffled[7]?.name || '---', score1: null, score2: null, winner: null }
+                        ],
+                        [
+                            { id: 201, p1: '---', p2: '---', score1: null, score2: null, winner: null },
+                            { id: 202, p1: '---', p2: '---', score1: null, score2: null, winner: null }
+                        ],
+                        [
+                            { id: 301, p1: '---', p2: '---', score1: null, score2: null, winner: null }
+                        ]
+                    ],
+                    champion: null
+                };
+
+                saveToLocalStorage();
+                renderBracket();
+                showToast("Đã khởi tạo Giải đấu mới thành công!");
+            }
+        }
+    </script>
+</body>
+</html>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        /* ================= FIREBASE CONFIGURATION ================= */
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsK5MpfkpTTZFDnS9h2ldhOT9ntsusZ-A",
+            authDomain: "pick-4d414.firebaseapp.com",
+            projectId: "pick-4d414",
+            storageBucket: "pick-4d414.firebasestorage.app",
+            messagingSenderId: "950065720358",
+            appId: "1:950065720358:web:9fa9e25eed033198bf8ae7",
+            measurementId: "G-Q35ZMHV1BP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pick-4d414';
+        const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+        const bracketDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament', 'currentBracket');
+
+        /* ================= STATE MANAGEMENT ================= */
+        const ADMIN_PASSWORD_HASH = "215151365"; // Admin password requirement
+        let isAdminLoggedIn = false;
+        let currentTab = 'members';
+        let isAuthReady = false;
+
+        // Sample initial seed members
+        let membersData = [
+            { id: "1", name: "Nguyễn Văn Hùng", rating: 4.2, gender: "Nam", phone: "0905123456", role: "Ban Quản Lý", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
+            { id: "2", name: "Trần Thị Minh Anh", rating: 3.5, gender: "Nữ", phone: "0914888999", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150" },
+            { id: "3", name: "Lê Hoàng Đức", rating: 4.0, gender: "Nam", phone: "0983112233", role: "Huấn Luận Viên", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" },
+            { id: "4", name: "Phạm Hải Yến", rating: 3.2, gender: "Nữ", phone: "0935445566", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150" },
+            { id: "5", name: "Đặng Quốc Bảo", rating: 3.8, gender: "Nam", phone: "0903778899", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
+            { id: "6", name: "Võ Tuyết Nhi", rating: 2.8, gender: "Nữ", phone: "0977223344", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
+            { id: "7", name: "Huỳnh Tấn Phát", rating: 4.5, gender: "Nam", phone: "0913990011", role: "Ban Quản Lý", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150" },
+            { id: "8", name: "Bùi Thị Thảo", rating: 3.0, gender: "Nữ", phone: "0908112244", role: "Thành viên", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150" }
+        ];
+
+        // Sample initial tournament bracket
+        let tournamentBracket = {
+            playerCount: 8,
+            rounds: [
+                [
+                    { id: 101, p1: "Nguyễn Văn Hùng", p2: "Bùi Thị Thảo", score1: 11, score2: 6, winner: "Nguyễn Văn Hùng" },
+                    { id: 102, p1: "Phạm Hải Yến", p2: "Đặng Quốc Bảo", score1: 8, score2: 11, winner: "Đặng Quốc Bảo" },
+                    { id: 103, p1: "Lê Hoàng Đức", p2: "Võ Tuyết Nhi", score1: 11, score2: 4, winner: "Lê Hoàng Đức" },
+                    { id: 104, p1: "Trần Thị Minh Anh", p2: "Huỳnh Tấn Phát", score1: 5, score2: 11, winner: "Huỳnh Tấn Phát" }
+                ],
+                [
+                    { id: 201, p1: "Nguyễn Văn Hùng", p2: "Đặng Quốc Bảo", score1: 11, score2: 9, winner: "Nguyễn Văn Hùng" },
+                    { id: 202, p1: "Lê Hoàng Đức", p2: "Huỳnh Tấn Phát", score1: 11, score2: 13, winner: "Huỳnh Tấn Phát" }
+                ],
+                [
+                    { id: 301, p1: "Nguyễn Văn Hùng", p2: "Huỳnh Tấn Phát", score1: null, score2: null, winner: null }
+                ]
+            ],
+            champion: null
+        };
+
+        async function initApp() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                isAuthReady = true;
+
+                // Subscribe to real-time members list
+                onSnapshot(membersColRef, (snapshot) => {
+                    if (snapshot.empty) {
+                        // Seed initial members into Firestore
+                        membersData.forEach(async (m) => {
+                            await setDoc(doc(membersColRef, m.id.toString()), m);
+                        });
+                    } else {
+                        membersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderMembers();
+                        renderSocialChecklist();
+                        updateStats();
+                    }
+                }, (error) => {
+                    console.error("Firestore members error:", error);
+                });
+
+                // Subscribe to real-time tournament bracket
+                onSnapshot(bracketDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        tournamentBracket = docSnap.data();
+                        renderBracket();
+                    } else {
+                        // Seed initial bracket
+                        setDoc(bracketDocRef, tournamentBracket);
+                    }
+                }, (error) => {
+                    console.error("Firestore bracket error:", error);
+                });
+
+            } catch(e) {
+                console.error("Firebase init failed, falling back to local state", e);
+                renderMembers();
+                renderSocialChecklist();
+                renderBracket();
+                updateStats();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-brand-500 text-slate-950' : (type === 'error' ? 'bg-red-500 text-white' : 'bg-slate-800 text-white');
+            const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : 'fa-info-circle');
+            
+            toast.className = `${bgColor} px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 font-semibold text-xs transition-all duration-300 transform translate-x-full pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['members', 'social', 'bracket'].forEach(t => {
+                const section = document.getElementById(`${t}-section`);
+                const btn = document.getElementById(`tab-${t}`);
+                const mbtn = document.getElementById(`mtab-${t}`);
+                if (t === tab) {
+                    section.classList.remove('hidden');
+                    btn?.classList.add('bg-brand-500', 'text-slate-950', 'shadow-md');
+                    btn?.classList.remove('text-slate-400');
+                    mbtn?.classList.add('text-brand-400', 'bg-brand-500/10');
+                    mbtn?.classList.remove('text-slate-400');
+                } else {
+                    section.classList.add('hidden');
+                    btn?.classList.remove('bg-brand-500', 'text-slate-950', 'shadow-md');
+                    btn?.classList.add('text-slate-400');
+                    mbtn?.classList.remove('text-brand-400', 'bg-brand-500/10');
+                    mbtn?.classList.add('text-slate-400');
+                }
+            });
+            if(tab === 'social') renderSocialChecklist();
+            if(tab === 'bracket') renderBracket();
+        }
+
+        function toggleAdminModal() {
+            if (isAdminLoggedIn) {
+                isAdminLoggedIn = false;
+                updateAdminUI();
+                showToast("Đã thoát chế độ Admin", "info");
+            } else {
+                document.getElementById('adminModal').classList.toggle('hidden');
+                setTimeout(() => {
+                    const input = document.getElementById('adminPasswordInput');
+                    if(input) input.focus();
+                }, 100);
+            }
+        }
+
+        function handleAdminLogin(e) {
+            if(e) e.preventDefault();
+            const input = document.getElementById('adminPasswordInput').value;
+            if (input === ADMIN_PASSWORD_HASH) {
+                isAdminLoggedIn = true;
+                updateAdminUI();
+                document.getElementById('adminModal').classList.add('hidden');
+                document.getElementById('adminPasswordInput').value = '';
+                showToast("Đăng nhập Admin thành công!");
+            } else {
+                showToast("Sai mật khẩu Admin!", "error");
+            }
+        }
+
+        function updateAdminUI() {
+            const adminBtn = document.getElementById('adminBtn');
+            const adminIcon = document.getElementById('adminIcon');
+            const adminText = document.getElementById('adminText');
+            const addMemberBtn = document.getElementById('addMemberBtn');
+            const setupBracketBtn = document.getElementById('setupBracketBtn');
+
+            if (isAdminLoggedIn) {
+                adminBtn.classList.replace('bg-slate-800', 'bg-brand-500');
+                adminBtn.classList.replace('text-slate-200', 'text-slate-950');
+                adminIcon.className = "fa-solid fa-lock-open text-slate-950";
+                adminText.innerText = "Thoát Admin";
+                addMemberBtn.classList.remove('hidden');
+                setupBracketBtn.classList.remove('hidden');
+            } else {
+                adminBtn.classList.replace('bg-brand-500', 'bg-slate-800');
+                adminBtn.classList.replace('text-slate-950', 'text-slate-200');
+                adminIcon.className = "fa-solid fa-lock text-slate-400";
+                adminText.innerText = "Đăng nhập Admin";
+                addMemberBtn.classList.add('hidden');
+                setupBracketBtn.classList.add('hidden');
+            }
+            renderMembers();
+            renderBracket();
+        }
+
+        function updateStats() {
+            const total = membersData.length;
+            const avg = total > 0 ? (membersData.reduce((acc, m) => acc + parseFloat(m.rating), 0) / total).toFixed(2) : "0.0";
+            const male = membersData.filter(m => m.gender === 'Nam').length;
+            const female = membersData.filter(m => m.gender === 'Nữ').length;
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statAvgRating').innerText = avg;
+            document.getElementById('statMale').innerText = male;
+            document.getElementById('statFemale').innerText = female;
+            document.getElementById('memberCountBadge').innerText = total;
+        }
+
+        function renderMembers() {
+            const grid = document.getElementById('membersGrid');
+            const searchInput = document.getElementById('searchInput');
+            const search = searchInput ? searchInput.value.toLowerCase() : '';
+            
+            const filtered = membersData.filter(m => 
+                (m.name || '').toLowerCase().includes(search) || 
+                (m.phone || '').includes(search) || 
+                (m.rating || '').toString().includes(search)
+            );
+
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-500">
+                        <i class="fa-solid fa-user-slash text-4xl mb-2"></i>
+                        <p>Không tìm thấy thành viên nào phù hợp.</p>
+                    </div>`;
+                return;
+            }
+
+            filtered.forEach(m => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between hover:border-slate-700 transition group relative overflow-hidden";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <img src="${m.avatar || 'https://placehold.co/150'}" onerror="this.src='https://placehold.co/150'" class="w-12 h-12 rounded-xl object-cover border border-slate-700">
+                                <div>
+                                    <h4 class="font-bold text-white text-sm group-hover:text-brand-400 transition truncate max-w-[140px]">${m.name}</h4>
+                                    <span class="text-[10px] font-semibold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">${m.role || 'Thành viên'}</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-extrabold bg-brand-500/10 text-brand-400 border border-brand-500/20 px-2 py-1 rounded-lg font-mono">DUPR ${parseFloat(m.rating || 0).toFixed(1)}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                            <div><i class="fa-solid fa-venus-mars text-slate-500 mr-1.5"></i>${m.gender}</div>
+                            <div><i class="fa-solid fa-phone text-slate-500 mr-1.5"></i>${m.phone || 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    ${isAdminLoggedIn ? `
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end gap-2">
+                        <button onclick="editMember('${m.id}')" class="text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition"><i class="fa-solid fa-pen"></i> Sửa</button>
+                        <button onclick="deleteMember('${m.id}')" class="text-xs text-red-400 hover:text-red-300 bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i> Xóa</button>
+                    </div>
+                    ` : ''}
+                `;
+                grid.appendChild(card);
+            });
+
+            updateStats();
+        }
+
+        function openMemberModal(member = null) {
+            document.getElementById('memberModal').classList.remove('hidden');
+            if (member) {
+                document.getElementById('memberModalTitle').innerText = "Cập Nhật Thành Viên";
+                document.getElementById('memberId').value = member.id;
+                document.getElementById('memberName').value = member.name;
+                document.getElementById('memberRating').value = member.rating;
+                document.getElementById('memberGender').value = member.gender;
+                document.getElementById('memberPhone').value = member.phone || '';
+                document.getElementById('memberRole').value = member.role || 'Thành viên';
+                document.getElementById('memberAvatarUrl').value = member.avatar || '';
+                document.getElementById('avatarPreview').src = member.avatar || 'https://placehold.co/200';
+            } else {
+                document.getElementById('memberModalTitle').innerText = "Thêm Thành Viên Mới";
+                document.getElementById('memberId').value = '';
+                document.getElementById('memberName').value = '';
+                document.getElementById('memberRating').value = '3.0';
+                document.getElementById('memberGender').value = 'Nam';
+                document.getElementById('memberPhone').value = '';
+                document.getElementById('memberRole').value = 'Thành viên';
+                document.getElementById('memberAvatarUrl').value = '';
+                document.getElementById('avatarPreview').src = 'https://placehold.co/200';
+            }
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.add('hidden');
+        }
+
+        function updateAvatarPreview(url) {
+            if(url) document.getElementById('avatarPreview').src = url;
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('avatarPreview').src = evt.target.result;
+                    document.getElementById('memberAvatarUrl').value = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveMember(e) {
+            e.preventDefault();
+            const id = document.getElementById('memberId').value || Date.now().toString();
+            const name = document.getElementById('memberName').value.trim();
+            const rating = parseFloat(document.getElementById('memberRating').value);
+            const gender = document.getElementById('memberGender').value;
+            const phone = document.getElementById('memberPhone').value.trim();
+            const role = document.getElementById('memberRole').value;
+            const avatar = document.getElementById('memberAvatarUrl').value || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(name)}`;
+
+            const memberObj = { id, name, rating, gender, phone, role, avatar };
+
+            if (isAuthReady) {
+                await setDoc(doc(membersColRef, id.toString()), memberObj);
+            } else {
+                const idx = membersData.findIndex(m => m.id == id);
+                if (idx !== -1) membersData[idx] = memberObj;
+                else membersData.push(memberObj);
+                renderMembers();
+            }
+
+            showToast("Đã lưu thông tin thành viên thành công!");
+            closeMemberModal();
+        }
+
+        function editMember(id) {
+            const member = membersData.find(m => m.id.toString() === id.toString());
+            if (member) openMemberModal(member);
+        }
+
+        async function deleteMember(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa thành viên này khỏi danh sách?")) {
+                if (isAuthReady) {
+                    await deleteDoc(doc(membersColRef, id.toString()));
+                } else {
+                    membersData = membersData.filter(m => m.id.toString() !== id.toString());
+                    renderMembers();
+                }
+                showToast("Đã xóa thành viên khỏi hệ thống", "info");
+            }
+        }
+
+        function renderSocialChecklist() {
+            const container = document.getElementById('socialMemberChecklist');
+            if(!container) return;
+            container.innerHTML = '';
+
+            membersData.forEach(m => {
+                const label = document.createElement('label');
+                label.className = "flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700 transition text-xs text-slate-200 select-none";
+                label.innerHTML = `
+                    <input type="checkbox" value="${m.id}" checked class="social-member-checkbox accent-brand-500 rounded">
+                    <span>${m.name}</span>
+                    <span class="text-[10px] text-brand-400 font-mono">(${m.rating})</span>
+                `;
+                container.appendChild(label);
+            });
+        }
+
+        function selectAllMembersForSocial(select) {
+            document.querySelectorAll('.social-member-checkbox').forEach(cb => cb.checked = select);
+        }
+
+        function generateRandomSocialMatches() {
+            const checkboxes = document.querySelectorAll('.social-member-checkbox:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value.toString());
+            
+            let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id.toString()));
+
+            if (selectedPlayers.length < 4) {
+                showToast("Cần ít nhất 4 người chơi để bốc thăm trận đấu!", "error");
+                return;
+            }
+
+            const courtCount = parseInt(document.getElementById('socialCourtCount').value);
+            const matchType = document.getElementById('socialMatchType').value;
+            const balanceMode = document.getElementById('socialBalanceMode').value;
+
+            selectedPlayers = selectedPlayers.sort(() => Math.random() - 0.5);
+
+            if (balanceMode === 'balanced') {
+                selectedPlayers.sort((a,b) => b.rating - a.rating);
+            }
+
+            const playersPerMatch = matchType === 'doubles' ? 4 : 2;
+            const resultsContainer = document.getElementById('socialMatchResults');
+            resultsContainer.innerHTML = '';
+
+            let playerIdx = 0;
+
+            for (let c = 1; c <= courtCount; c++) {
+                if (playerIdx + playersPerMatch > selectedPlayers.length) break;
+
+                const courtMatchPlayers = selectedPlayers.slice(playerIdx, playerIdx + playersPerMatch);
+                playerIdx += playersPerMatch;
+
+                let teamA, teamB;
+                if (matchType === 'doubles') {
+                    teamA = [courtMatchPlayers[0], courtMatchPlayers[3]];
+                    teamB = [courtMatchPlayers[1], courtMatchPlayers[2]];
+                } else {
+                    teamA = [courtMatchPlayers[0]];
+                    teamB = [courtMatchPlayers[1]];
+                }
+
+                const courtCard = document.createElement('div');
+                courtCard.className = "bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden";
+                courtCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
+                        <span class="text-sm font-extrabold text-brand-400 flex items-center gap-2">
+                            <i class="fa-solid fa-border-all"></i> SÂN ĐẤU SỐ ${c}
+                        </span>
+                        <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-0.5 rounded-full border border-slate-700">${matchType === 'doubles' ? 'Trận Đôi' : 'Trận Đơn'}</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 items-center relative">
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Đội A</span>
+                            ${teamA.map(p => `
+                                <div class="font-bold text-white text-xs py-0.5">${p.name} <span class="text-brand-400 font-mono text-[10px]">(${p.rating})</span></div>
+                            `).join('')}
+                        </div>
+
+                        <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] font-black text-brand-400 z-10 shadow">VS</div>
+
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-center">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Đội B</span>
+                            ${teamB.map(p => `
+                                <div class="font-bold text-white text-xs py-0.5">${p.name} <span class="text-brand-400 font-mono text-[10px]">(${p.rating})</span></div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                resultsContainer.appendChild(courtCard);
+            }
+
+            const leftoverPlayers = selectedPlayers.slice(playerIdx);
+            if (leftoverPlayers.length > 0) {
+                const waitingCard = document.createElement('div');
+                waitingCard.className = "col-span-full bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4";
+                waitingCard.innerHTML = `
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-amber-400"></i> Danh Sách Chờ Lượt Tiếp Theo (${leftoverPlayers.length})
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${leftoverPlayers.map(p => `
+                            <span class="bg-slate-900 border border-slate-800 text-slate-300 text-xs px-3 py-1 rounded-lg">${p.name} (${p.rating})</span>
+                        `).join('')}
+                    </div>
+                `;
+                resultsContainer.appendChild(waitingCard);
+            }
+
+            showToast("Đã bốc thăm ghép cặp ngẫu nhiên thành công!");
+        }
+
+        function renderBracket() {
+            const container = document.getElementById('bracketTreeContainer');
+            if(!container) return;
+            container.innerHTML = '';
+
+            const roundTitles = ["Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
+
+            (tournamentBracket.rounds || []).forEach((roundMatches, roundIdx) => {
+                const column = document.createElement('div');
+                column.className = "flex flex-col justify-around h-full space-y-8 flex-1 min-w-[220px]";
+
+                const roundHeader = document.createElement('h4');
+                roundHeader.className = "text-center text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-4 bg-slate-950 py-1.5 rounded-lg border border-slate-800/80";
+                roundHeader.innerText = roundTitles[roundIdx] || `Vòng ${roundIdx + 1}`;
+                column.appendChild(roundHeader);
+
+                roundMatches.forEach((match, matchIdx) => {
+                    const matchCard = document.createElement('div');
+                    matchCard.className = "bracket-match bg-slate-900 border border-slate-800 rounded-xl p-3 relative cursor-pointer shadow-md";
+                    
+                    if (isAdminLoggedIn) {
+                        matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
+                    }
+
+                    const isP1Winner = match.winner && match.winner === match.p1;
+                    const isP2Winner = match.winner && match.winner === match.p2;
+
+                    matchCard.innerHTML = `
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center p-1.5 rounded-lg ${isP1Winner ? 'bg-brand-500/10 border border-brand-500/30' : 'bg-slate-950'}">
+                                <span class="text-xs font-semibold ${isP1Winner ? 'text-brand-400 font-bold' : 'text-slate-300'} truncate max-w-[130px]">
+                                    ${match.p1 || '---'}
+                                </span>
+                                <span class="text-xs font-mono font-bold ${isP1Winner ? 'text-brand-400' : 'text-slate-500'}">
+                                    ${match.score1 !== null && match.score1 !== undefined ? match.score1 : '-'}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center p-1.5 rounded-lg ${isP2Winner ? 'bg-brand-500/10 border border-brand-500/30' : 'bg-slate-950'}">
+                                <span class="text-xs font-semibold ${isP2Winner ? 'text-brand-400 font-bold' : 'text-slate-300'} truncate max-w-[130px]">
+                                    ${match.p2 || '---'}
+                                </span>
+                                <span class="text-xs font-mono font-bold ${isP2Winner ? 'text-brand-400' : 'text-slate-500'}">
+                                    ${match.score2 !== null && match.score2 !== undefined ? match.score2 : '-'}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    column.appendChild(matchCard);
+                });
+
+                container.appendChild(column);
+            });
+
+            const champCol = document.createElement('div');
+            champCol.className = "flex flex-col items-center justify-center min-w-[180px]";
+            champCol.innerHTML = `
+                <div class="text-center p-6 bg-gradient-to-b from-amber-500/10 to-slate-900 border border-amber-500/30 rounded-2xl w-full">
+                    <i class="fa-solid fa-trophy text-4xl text-amber-400 mb-2 animate-bounce"></i>
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-widest mb-1">QUÁN QUÂN</h4>
+                    <p class="text-base font-extrabold text-white truncate">${tournamentBracket.champion || 'Chưa xác định'}</p>
+                </div>
+            `;
+            container.appendChild(champCol);
+        }
+
+        function openScoreModal(roundIdx, matchIdx) {
+            const match = tournamentBracket.rounds[roundIdx][matchIdx];
+            if (!match.p1 || !match.p2 || match.p1 === '---' || match.p2 === '---') {
+                showToast("Chưa đủ 2 đội tham gia trận đấu này!", "error");
+                return;
+            }
+
+            document.getElementById('matchRoundIdx').value = roundIdx;
+            document.getElementById('matchMatchIdx').value = matchIdx;
+            document.getElementById('player1Name').innerText = match.p1;
+            document.getElementById('player2Name').innerText = match.p2;
+            document.getElementById('score1').value = match.score1 !== null ? match.score1 : 0;
+            document.getElementById('score2').value = match.score2 !== null ? match.score2 : 0;
+
+            document.getElementById('scoreModal').classList.remove('hidden');
+        }
+
+        function closeScoreModal() {
+            document.getElementById('scoreModal').classList.add('hidden');
+        }
+
+        async function saveMatchScore(e) {
+            e.preventDefault();
+            const roundIdx = parseInt(document.getElementById('matchRoundIdx').value);
+            const matchIdx = parseInt(document.getElementById('matchMatchIdx').value);
+            const s1 = parseInt(document.getElementById('score1').value);
+            const s2 = parseInt(document.getElementById('score2').value);
+
+            if (s1 === s2) {
+                showToast("Tỷ số Pickleball không được hòa!", "error");
+                return;
+            }
+
+            const match = tournamentBracket.rounds[roundIdx][matchIdx];
+            match.score1 = s1;
+            match.score2 = s2;
+            match.winner = s1 > s2 ? match.p1 : match.p2;
+
+            if (roundIdx + 1 < tournamentBracket.rounds.length) {
+                const nextMatchIdx = Math.floor(matchIdx / 2);
+                const nextMatch = tournamentBracket.rounds[roundIdx + 1][nextMatchIdx];
+                if (matchIdx % 2 === 0) {
+                    nextMatch.p1 = match.winner;
+                } else {
+                    nextMatch.p2 = match.winner;
+                }
+            } else {
+                tournamentBracket.champion = match.winner;
+            }
+
+            if (isAuthReady) {
+                await setDoc(bracketDocRef, tournamentBracket);
+            } else {
+                renderBracket();
+            }
+
+            closeScoreModal();
+            showToast(`Đã cập nhật chiến thắng cho ${match.winner}!`);
+        }
+
+        async function generateNewBracketModal() {
+            if (membersData.length < 4) {
+                showToast("Cần ít nhất 4 thành viên để tạo sơ đồ thi đấu!", "error");
+                return;
+            }
+
+            if (confirm("Bạn có muốn tạo lại Sơ đồ giải đấu mới ngẫu nhiên từ danh sách thành viên hiện tại?")) {
+                const shuffled = [...membersData].sort(() => Math.random() - 0.5);
+                
+                tournamentBracket = {
+                    playerCount: 8,
+                    rounds: [
+                        [
+                            { id: 101, p1: shuffled[0]?.name || '---', p2: shuffled[1]?.name || '---', score1: null, score2: null, winner: null },
+                            { id: 102, p1: shuffled[2]?.name || '---', p2: shuffled[3]?.name || '---', score1: null, score2: null, winner: null },
+                            { id: 103, p1: shuffled[4]?.name || '---', p2: shuffled[5]?.name || '---', score1: null, score2: null, winner: null },
+                            { id: 104, p1: shuffled[6]?.name || '---', p2: shuffled[7]?.name || '---', score1: null, score2: null, winner: null }
+                        ],
+                        [
+                            { id: 201, p1: '---', p2: '---', score1: null, score2: null, winner: null },
+                            { id: 202, p1: '---', p2: '---', score1: null, score2: null, winner: null }
+                        ],
+                        [
+                            { id: 301, p1: '---', p2: '---', score1: null, score2: null, winner: null }
+                        ]
+                    ],
+                    champion: null
+                };
+
+                if (isAuthReady) {
+                    await setDoc(bracketDocRef, tournamentBracket);
+                } else {
+                    renderBracket();
+                }
+                showToast("Đã khởi tạo Giải đấu mới thành công!");
+            }
+        }
+
+        // Global function bindings for window event listeners
+        window.switchTab = switchTab;
+        window.toggleAdminModal = toggleAdminModal;
+        window.handleAdminLogin = handleAdminLogin;
+        window.openMemberModal = openMemberModal;
+        window.closeMemberModal = closeMemberModal;
+        window.updateAvatarPreview = updateAvatarPreview;
+        window.handleFileUpload = handleFileUpload;
+        window.saveMember = saveMember;
+        window.editMember = editMember;
+        window.deleteMember = deleteMember;
+        window.renderMembers = renderMembers;
+        window.selectAllMembersForSocial = selectAllMembersForSocial;
+        window.generateRandomSocialMatches = generateRandomSocialMatches;
+        window.openScoreModal = openScoreModal;
+        window.closeScoreModal = closeScoreModal;
+        window.saveMatchScore = saveMatchScore;
+        window.generateNewBracketModal = generateNewBracketModal;
+    </script>
+</body>
+</html>
