@@ -414,19 +414,23 @@
     </div>
 
     <!-- 3. IMAGE CROPPING TOOL MODAL -->
-    <div id="cropModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div id="cropModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
             <button onclick="closeCropperModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 w-9 h-9 flex items-center justify-center rounded-full active:bg-slate-100 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             
             <div class="mb-4">
                 <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-crop-simple text-lime-600"></i> Cắt Ảnh Đại Diện
+                    <i class="fa-solid fa-crop-simple text-lime-600"></i> Cắt & Căn Chỉnh Ảnh Đại Diện
                 </h3>
                 <p class="text-xs text-slate-500 font-medium mt-0.5">Di chuyển, xoay và thu phóng khung cắt vuông cho vừa chuẩn gương mặt</p>
             </div>
 
-            <!-- Cropper Canvas Container -->
-            <div class="relative w-full h-64 sm:h-80 bg-slate-900 rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
+            <!-- Cropper Canvas Container with Loading Overlay -->
+            <div id="cropperWrapper" class="relative w-full h-64 sm:h-80 bg-slate-900 rounded-2xl overflow-hidden mb-4 flex items-center justify-center border border-slate-800">
+                <div id="cropperLoadingSpinner" class="absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-2 text-lime-400">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
+                    <span class="text-xs font-bold text-slate-300">Đang tối ưu hóa hình ảnh...</span>
+                </div>
                 <img id="cropperImg" class="max-w-full max-h-full block">
             </div>
 
@@ -454,7 +458,7 @@
             <!-- Cropper Actions -->
             <div class="flex gap-3">
                 <button type="button" onclick="closeCropperModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs transition">Hủy</button>
-                <button type="button" onclick="applyCrop()" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-2xl text-xs transition shadow-md shadow-lime-500/20 flex items-center justify-center gap-1.5">
+                <button type="button" onclick="applyCrop()" class="flex-1 bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black py-2.5 rounded-2xl text-xs transition shadow-md shadow-lime-500/20 flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-check"></i> Cắt & Áp Dụng
                 </button>
             </div>
@@ -663,171 +667,11 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        /* ================= FIREBASE CONFIGURATION ================= */
-        const firebaseConfig = {
-            apiKey: "AIzaSyAsK5MpfkpTTZFDnS9h2ldhOT9ntsusZ-A",
-            authDomain: "pick-4d414.firebaseapp.com",
-            projectId: "pick-4d414",
-            storageBucket: "pick-4d414.firebasestorage.app",
-            messagingSenderId: "950065720358",
-            appId: "1:950065720358:web:9fa9e25eed033198bf8ae7",
-            measurementId: "G-Q35ZMHV1BP"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'pick-4d414';
-        const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
-        const bracketDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament', 'currentBracket');
-        const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'clubConfig');
-
-        /* ================= STATE MANAGEMENT ================= */
-        const ADMIN_PASSWORD_HASH = "215151365"; 
-        let isAdminLoggedIn = false;
-        let currentLoggedUser = null; 
-        let isAuthReady = false;
-        let clubLogoUrl = "";
-        let tempLogoDataUrl = "";
-
-        // Cropper Global Instances
-        let cropperInstance = null;
-        let activeCropTarget = 'reg'; // 'reg' or 'member'
-
-        let membersData = [
-            { id: "1", name: "Nguyễn Văn Hùng", rating: 4.2, gender: "Nam", phone: "0905123456", password: "123", role: "Ban Quản Lý", hand: "Tay Phải", position: "Bên Trái (Left)", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
-            { id: "2", name: "Trần Thị Minh Anh", rating: 3.5, gender: "Nữ", phone: "0914888999", password: "123", role: "Thành viên", hand: "Tay Phải", position: "Bên Phải (Right)", avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150" },
-            { id: "3", name: "Lê Hoàng Đức", rating: 4.0, gender: "Nam", phone: "0983112233", password: "123", role: "Huấn Luận Viên", hand: "Tay Trái", position: "Cả Hai Bên", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" },
-            { id: "4", name: "Phạm Hải Yến", rating: 3.2, gender: "Nữ", phone: "0935445566", password: "123", role: "Thành viên", hand: "Tay Phải", position: "Bên Phải (Right)", avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150" },
-            { id: "5", name: "Đặng Quốc Bảo", rating: 3.8, gender: "Nam", phone: "0903778899", password: "123", role: "Thành viên", hand: "Tay Phải", position: "Bên Trái (Left)", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
-            { id: "6", name: "Võ Tuyết Nhi", rating: 2.8, gender: "Nữ", phone: "0977223344", password: "123", role: "Thành viên", hand: "Tay Phải", position: "Cả Hai Bên", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" }
-        ];
-
-        let tournamentBracket = {
-            playerCount: 8,
-            format: "doubles",
-            rounds: [
-                {
-                    roundName: "Vòng Tứ Kết",
-                    matches: [
-                        { id: 101, court: "Sân Ecohome 1", p1: "Nguyễn Văn Hùng", p2: "Bùi Thị Thảo", score1: 11, score2: 6, winner: "Nguyễn Văn Hùng" },
-                        { id: 102, court: "Sân Ecohome 2", p1: "Phạm Hải Yến", p2: "Đặng Quốc Bảo", score1: 8, score2: 11, winner: "Đặng Quốc Bảo" },
-                        { id: 103, court: "Sân Ecohome 3", p1: "Lê Hoàng Đức", p2: "Võ Tuyết Nhi", score1: 11, score2: 4, winner: "Lê Hoàng Đức" },
-                        { id: 104, court: "Sân Ecohome 4", p1: "Trần Thị Minh Anh", p2: "Huỳnh Tấn Phát", score1: 5, score2: 11, winner: "Huỳnh Tấn Phát" }
-                    ]
-                },
-                {
-                    roundName: "Vòng Bán Kết",
-                    matches: [
-                        { id: 201, court: "Sân Ecohome 1", p1: "Nguyễn Văn Hùng", p2: "Đặng Quốc Bảo", score1: 11, score2: 9, winner: "Nguyễn Văn Hùng" },
-                        { id: 202, court: "Sân Ecohome 2", p1: "Lê Hoàng Đức", p2: "Huỳnh Tấn Phát", score1: 11, score2: 13, winner: "Huỳnh Tấn Phát" }
-                    ]
-                },
-                {
-                    roundName: "Trận Chung Kết",
-                    matches: [
-                        { id: 301, court: "Sân Trung Tâm (Chung Kết)", p1: "Nguyễn Văn Hùng", p2: "Huỳnh Tấn Phát", score1: null, score2: null, winner: null }
-                    ]
-                }
-            ],
-            champion: null
-        };
-
-        async function initApp() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } catch (tokenErr) {
-                        console.warn("Custom token authentication fallback:", tokenErr);
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
-                }
-                isAuthReady = true;
-
-                const savedSession = sessionStorage.getItem('ecohome_user_session');
-                if (savedSession) {
-                    try { currentLoggedUser = JSON.parse(savedSession); } catch(e){}
-                }
-
-                // Listen to Club Config (Logo)
-                onSnapshot(configDocRef, (docSnap) => {
-                    if (docSnap.exists() && docSnap.data().logoUrl) {
-                        clubLogoUrl = docSnap.data().logoUrl;
-                    } else {
-                        clubLogoUrl = "";
-                    }
-                    renderHeaderLogo();
-                }, (err) => console.error("Config error:", err));
-
-                // Listen to Members
-                onSnapshot(membersColRef, (snapshot) => {
-                    if (snapshot.empty) {
-                        membersData.forEach(async (m) => {
-                            await setDoc(doc(membersColRef, m.id.toString()), m);
-                        });
-                    } else {
-                        membersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        if (currentLoggedUser) {
-                            const updatedUser = membersData.find(m => m.id.toString() === currentLoggedUser.id.toString());
-                            if (updatedUser) {
-                                currentLoggedUser = updatedUser;
-                                sessionStorage.setItem('ecohome_user_session', JSON.stringify(currentLoggedUser));
-                            }
-                        }
-                        renderHeaderUserBadge();
-                        renderMembers();
-                        renderSocialChecklist();
-                        updateStats();
-                    }
-                }, (error) => console.error("Members error:", error));
-
-                // Listen to Bracket
-                onSnapshot(bracketDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        if (data.rounds && Array.isArray(data.rounds) && data.rounds.length > 0 && Array.isArray(data.rounds[0])) {
-                            data.rounds = data.rounds.map((mList, idx) => ({
-                                roundName: idx === 0 ? "Vòng Tứ Kết" : idx === 1 ? "Vòng Bán Kết" : "Trận Chung Kết",
-                                matches: mList
-                            }));
-                        }
-                        tournamentBracket = data;
-                        renderBracket();
-                    } else {
-                        setDoc(bracketDocRef, tournamentBracket);
-                    }
-                }, (error) => console.error("Bracket error:", error));
-
-            } catch(e) {
-                console.error("Firebase init failed", e);
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', initApp);
-
-        function renderHeaderLogo() {
-            const logoContent = document.getElementById('clubLogoContent');
-            if (!logoContent) return;
-
-            if (clubLogoUrl) {
-                logoContent.innerHTML = `<img src="${clubLogoUrl}" alt="Ecohome Pickleball Logo" class="w-full h-full object-cover">`;
-            } else {
-                logoContent.innerHTML = `<i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl animate-pulse"></i>`;
-            }
-        }
-
-        /* ================= CROPPER FUNCTIONS ================= */
+        /* ================= CROPPER FUNCTIONS (OPTIMIZED FOR SMOOTHNESS & SPEED) ================= */
         function handleRegFileSelect(e) {
             const file = e.target.files && e.target.files[0];
             if (file) {
-                openCropperModal(file, 'reg');
+                processAndOpenCropper(file, 'reg');
                 e.target.value = '';
             }
         }
@@ -835,42 +679,82 @@
         function handleMemberFileSelect(e) {
             const file = e.target.files && e.target.files[0];
             if (file) {
-                openCropperModal(file, 'member');
+                processAndOpenCropper(file, 'member');
                 e.target.value = '';
             }
         }
 
-        function openCropperModal(file, target) {
+        async function processAndOpenCropper(file, target) {
             if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast("Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, WebP)!", "error");
+                return;
+            }
+
             activeCropTarget = target;
+            const modal = document.getElementById('cropModal');
+            const spinner = document.getElementById('cropperLoadingSpinner');
+            
+            modal.classList.remove('hidden');
+            if (spinner) spinner.classList.remove('hidden');
 
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const cropperImg = document.getElementById('cropperImg');
-                cropperImg.src = evt.target.result;
+            try {
+                // Pre-downscale huge camera photos offscreen to ensure 60fps smooth touch cropping on mobile
+                const imageBitmap = await createImageBitmap(file);
+                const MAX_DIM = 1200;
+                let width = imageBitmap.width;
+                let height = imageBitmap.height;
 
-                document.getElementById('cropModal').classList.remove('hidden');
-
-                if (cropperInstance) {
-                    cropperInstance.destroy();
+                if (width > MAX_DIM || height > MAX_DIM) {
+                    if (width > height) {
+                        height = Math.round((height * MAX_DIM) / width);
+                        width = MAX_DIM;
+                    } else {
+                        width = Math.round((width * MAX_DIM) / height);
+                        height = MAX_DIM;
+                    }
                 }
 
-                // Initialize Cropper.js instance with 1:1 square ratio
-                cropperInstance = new Cropper(cropperImg, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.85,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                });
-            };
-            reader.readAsDataURL(file);
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = width;
+                offCanvas.height = height;
+                const ctx = offCanvas.getContext('2d');
+                ctx.drawImage(imageBitmap, 0, 0, width, height);
+
+                const optimizedDataUrl = offCanvas.toDataURL('image/jpeg', 0.90);
+                const cropperImg = document.getElementById('cropperImg');
+
+                cropperImg.onload = function() {
+                    if (cropperInstance) {
+                        cropperInstance.destroy();
+                    }
+
+                    cropperInstance = new Cropper(cropperImg, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.88,
+                        responsive: true,
+                        checkOrientation: true,
+                        restore: false,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        toggleDragModeOnDblclick: false,
+                        ready() {
+                            if (spinner) spinner.classList.add('hidden');
+                        }
+                    });
+                };
+                cropperImg.src = optimizedDataUrl;
+
+            } catch (err) {
+                console.error("Image processing error:", err);
+                if (spinner) spinner.classList.add('hidden');
+                showToast("Lỗi khi đọc file ảnh, vui lòng thử lại!", "error");
+            }
         }
 
         function closeCropperModal() {
@@ -905,7 +789,7 @@
 
             if (!canvas) return;
 
-            const croppedBase64 = canvas.toDataURL('image/jpeg', 0.88);
+            const croppedBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
             if (activeCropTarget === 'reg') {
                 document.getElementById('regAvatar').value = croppedBase64;
