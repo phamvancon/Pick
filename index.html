@@ -70,12 +70,19 @@
             box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.25);
         }
 
+        /* Custom Cropper Modal Styling */
         .cropper-container {
             border-radius: 1rem;
             overflow: hidden;
         }
         .cropper-view-box, .cropper-face {
-            border-radius: 1rem;
+            border-radius: 0.75rem;
+        }
+
+        /* Dropzone hover effect */
+        .dropzone-active {
+            border-color: #84cc16 !important;
+            background-color: #f7fee7 !important;
         }
 
         ::-webkit-scrollbar {
@@ -334,7 +341,7 @@
                     <i class="fa-solid fa-user-shield text-lime-700 text-2xl"></i>
                 </div>
                 <h3 class="text-lg sm:text-xl font-black text-slate-900">Xác Thực Quản Trị Viên</h3>
-                <p class="text-xs text-slate-500 font-medium mt-1">Mật khẩu mặc định: <span class="font-mono text-lime-700 font-bold">xxxx</span></p>
+                <p class="text-xs text-slate-500 font-medium mt-1">Mật khẩu mặc định: <span class="font-mono text-lime-700 font-bold">215151365</span></p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div class="relative">
@@ -401,40 +408,73 @@
         </div>
     </div>
 
-    <!-- 3. IMAGE CROPPING TOOL MODAL -->
+    <!-- 3. ENHANCED IMAGE CROPPING TOOL MODAL -->
     <div id="cropModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 transition-all duration-300">
-        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
-            <button onclick="closeCropperModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 w-9 h-9 flex items-center justify-center rounded-full active:bg-slate-100 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl p-5 sm:p-6 shadow-2xl relative flex flex-col max-h-[92vh] overflow-hidden">
+            <button onclick="closeCropperModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 w-9 h-9 flex items-center justify-center rounded-full active:bg-slate-100 transition z-10"><i class="fa-solid fa-xmark text-lg"></i></button>
             
-            <div class="mb-4">
+            <div class="mb-3">
                 <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-crop-simple text-lime-600"></i> Cắt & Căn Chỉnh Ảnh Đại Diện
+                    <i class="fa-solid fa-crop-simple text-lime-600"></i> Chỉnh Sửa & Căn Chỉnh Ảnh Đại Diện
                 </h3>
-                <p class="text-xs text-slate-500 font-medium mt-0.5">Di chuyển, xoay và thu phóng khung cắt vuông cho vừa chuẩn gương mặt</p>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">Xoay, lật, thu phóng góc chụp. Xem trước trực tiếp và bấm <strong class="text-slate-800">"Áp Dụng Xem Trước"</strong>. Sự thay đổi chỉ chính thức lưu khi bấm <strong class="text-lime-700">"Lưu Thông Tin"</strong> trong form.</p>
             </div>
 
-            <!-- Cropper Canvas Container -->
-            <div id="cropperWrapper" class="relative w-full h-64 sm:h-80 bg-slate-900 rounded-2xl overflow-hidden mb-4 flex items-center justify-center border border-slate-800">
-                <div id="cropperLoadingSpinner" class="absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-2 text-lime-400">
-                    <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
-                    <span class="text-xs font-bold text-slate-300">Đang tối ưu hóa hình ảnh...</span>
+            <!-- Main Crop Area + Live Preview Side Panel -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 items-center">
+                <!-- Canvas Wrapper -->
+                <div id="cropperWrapper" class="md:col-span-2 relative w-full h-60 sm:h-72 bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-inner">
+                    <div id="cropperLoadingSpinner" class="absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-2 text-lime-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
+                        <span class="text-xs font-bold text-slate-300">Đang tối ưu hóa hình ảnh...</span>
+                    </div>
+                    <img id="cropperImg" class="max-w-full max-h-full block">
                 </div>
-                <img id="cropperImg" class="max-w-full max-h-full block">
+
+                <!-- Live Preview Display Boxes -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-center justify-center gap-3">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Xem Trước Trực Tiếp</span>
+                    
+                    <!-- Circular Preview -->
+                    <div class="flex items-center gap-3">
+                        <div class="text-center">
+                            <div class="w-20 h-20 rounded-full border-2 border-lime-500 overflow-hidden shadow-md mx-auto bg-slate-200">
+                                <div id="liveCropPreviewCircle" class="w-full h-full overflow-hidden"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500 mt-1 block">Hình Tròn</span>
+                        </div>
+
+                        <!-- Square Preview -->
+                        <div class="text-center">
+                            <div class="w-20 h-20 rounded-2xl border-2 border-sky-500 overflow-hidden shadow-md mx-auto bg-slate-200">
+                                <div id="liveCropPreviewSquare" class="w-full h-full overflow-hidden"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500 mt-1 block">Hình Thẻ</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-lime-100 border border-lime-300 text-lime-900 text-[11px] p-2 rounded-xl text-center font-bold">
+                        <i class="fa-solid fa-circle-info text-lime-700 mr-1"></i> Bấm "Áp Dụng" -> Sau đó bấm "Lưu Thông Tin" để hoàn tất!
+                    </div>
+                </div>
             </div>
 
             <!-- Cropper Controls Bar -->
-            <div class="flex items-center justify-between gap-2 mb-5 bg-slate-50 p-2 rounded-2xl border border-slate-200">
-                <div class="flex items-center gap-1">
-                    <button type="button" onclick="rotateCropper(-90)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Xoay trái 90°">
-                        <i class="fa-solid fa-rotate-left"></i>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4 bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-xs">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="rotateCropper(-90)" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center gap-1 active:scale-95 transition" title="Xoay trái 90°">
+                        <i class="fa-solid fa-rotate-left"></i> <span>Xoay trái</span>
                     </button>
-                    <button type="button" onclick="rotateCropper(90)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Xoay phải 90°">
-                        <i class="fa-solid fa-rotate-right"></i>
+                    <button type="button" onclick="rotateCropper(90)" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center gap-1 active:scale-95 transition" title="Xoay phải 90°">
+                        <i class="fa-solid fa-rotate-right"></i> <span>Xoay phải</span>
                     </button>
-                    <button type="button" onclick="zoomCropper(0.1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Phóng to">
+                    <button type="button" onclick="flipCropperX()" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center gap-1 active:scale-95 transition" title="Lật ngang">
+                        <i class="fa-solid fa-arrows-left-right"></i> <span>Lật</span>
+                    </button>
+                    <button type="button" onclick="zoomCropper(0.1)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Phóng to">
                         <i class="fa-solid fa-magnifying-glass-plus"></i>
                     </button>
-                    <button type="button" onclick="zoomCropper(-0.1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Thu nhỏ">
+                    <button type="button" onclick="zoomCropper(-0.1)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Thu nhỏ">
                         <i class="fa-solid fa-magnifying-glass-minus"></i>
                     </button>
                 </div>
@@ -445,15 +485,15 @@
 
             <!-- Cropper Actions -->
             <div class="flex gap-3">
-                <button type="button" onclick="closeCropperModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs transition">Hủy</button>
+                <button type="button" onclick="closeCropperModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs transition">Hủy bỏ</button>
                 <button type="button" onclick="applyCrop()" class="flex-1 bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black py-2.5 rounded-2xl text-xs transition shadow-md shadow-lime-500/20 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-check"></i> Cắt & Áp Dụng
+                    <i class="fa-solid fa-check text-sm"></i> Áp Dụng Xem Trước
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- 4. MEMBER AUTH MODAL -->
+    <!-- 4. MEMBER AUTH MODAL (LOGIN & REGISTER WITH INTEGRATED IMAGE DROPZONE) -->
     <div id="userAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="toggleUserAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -486,15 +526,16 @@
             <form id="memberRegisterForm" onsubmit="handleMemberRegister(event)" class="space-y-4 hidden">
                 <div class="space-y-1.5">
                     <label class="block text-xs font-extrabold text-slate-600">Ảnh Đại Diện Thành Viên *</label>
-                    <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div id="regDropzone" class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border-2 border-dashed border-slate-300 transition hover:border-lime-500">
                         <div class="w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm">
                             <img id="regAvatarPreview" src="https://placehold.co/200x200/f1f5f9/65a30d?text=Avatar" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1 space-y-1.5">
                             <label class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-crop-simple"></i> Tải & Cắt Ảnh từ máy
+                                <i class="fa-solid fa-crop-simple"></i> Chọn & Cắt Ảnh từ máy
                                 <input type="file" id="regAvatarFileInput" accept="image/*" onchange="handleRegFileSelect(event)" class="hidden">
                             </label>
+                            <p class="text-[10px] text-slate-500 font-medium">Hoặc kéo thả file ảnh vào đây</p>
                             <input type="text" id="regAvatar" placeholder="Hoặc dán URL đường dẫn ảnh..." oninput="updateRegAvatarFromUrl(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-lime-500">
                         </div>
                     </div>
@@ -553,7 +594,7 @@
         </div>
     </div>
 
-    <!-- 5. ADD/EDIT MEMBER MODAL -->
+    <!-- 5. ADD/EDIT MEMBER MODAL (STAGED AVATAR EDITING) -->
     <div id="memberModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeMemberModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -561,15 +602,19 @@
 
             <form onsubmit="saveMember(event)" class="space-y-4">
                 <input type="hidden" id="memberId">
-                <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                    <div class="w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm">
+                <div id="memberDropzone" class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border-2 border-dashed border-slate-300 transition hover:border-lime-500">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm group">
                         <img id="avatarPreview" src="https://placehold.co/200x200/f1f5f9/65a30d?text=Avatar" class="w-full h-full object-cover">
+                        <div id="avatarStagedBadge" class="hidden absolute inset-0 bg-lime-950/70 text-lime-300 text-[9px] font-black flex items-center justify-center text-center p-1">
+                            Đã cắt ảnh<br>(Chờ lưu)
+                        </div>
                     </div>
                     <div class="flex-1 space-y-1.5">
                         <label class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-crop-simple"></i> Chọn & Cắt Ảnh mới
+                            <i class="fa-solid fa-crop-simple"></i> Chọn & Cắt Ảnh Mới
                             <input type="file" id="memberAvatarFile" accept="image/*" onchange="handleMemberFileSelect(event)" class="hidden">
                         </label>
+                        <p class="text-[10px] text-slate-500 font-medium">Bấm cắt ảnh xem trước, sau đó chọn "Lưu Thông Tin" bên dưới để hoàn tất.</p>
                         <input type="text" id="memberAvatarUrl" oninput="updateAvatarPreview(this.value)" placeholder="Hoặc dán URL đường dẫn ảnh..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none font-medium">
                     </div>
                 </div>
@@ -609,8 +654,10 @@
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-slate-200">
-                    <button type="button" onclick="closeMemberModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-sm transition">Hủy</button>
-                    <button type="submit" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2 rounded-xl text-sm transition shadow-md shadow-lime-500/20">Lưu Thông Tin</button>
+                    <button type="button" onclick="closeMemberModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm transition">Hủy bỏ</button>
+                    <button type="submit" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-xl text-sm transition shadow-md shadow-lime-500/20">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Lưu Thông Tin
+                    </button>
                 </div>
             </form>
         </div>
@@ -652,7 +699,7 @@
         </div>
     </div>
 
-    <!-- 7. CUSTOM CONFIRMATION MODAL (NO BROWSER CONFIRM) -->
+    <!-- 7. CUSTOM CONFIRMATION MODAL (NO NATIVE BROWSER CONFIRM) -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl text-center space-y-4">
             <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto text-amber-600 text-xl border border-amber-300">
@@ -727,6 +774,7 @@
         let cropperInstance = null;
         let activeCropTarget = 'reg';
         let tempLogoDataUrl = "";
+        let flipX = 1;
 
         function customConfirm(title, message, onOk) {
             const modal = document.getElementById('confirmModal');
@@ -817,10 +865,42 @@
                 } catch(e) {}
             }
 
+            setupDropzones();
             renderHeaderLogo();
             renderHeaderUserBadge();
             renderMembers();
             renderBracket();
+        }
+
+        function setupDropzones() {
+            ['regDropzone', 'memberDropzone'].forEach(dzId => {
+                const dz = document.getElementById(dzId);
+                if (!dz) return;
+
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    dz.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dz.classList.add('dropzone-active');
+                    }, false);
+                });
+
+                ['dragleave', 'drop'].forEach(eventName => {
+                    dz.addEventListener(eventName, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dz.classList.remove('dropzone-active');
+                    }, false);
+                });
+
+                dz.addEventListener('drop', (e) => {
+                    const files = e.dataTransfer.files;
+                    if (files && files.length > 0) {
+                        const target = dzId === 'regDropzone' ? 'reg' : 'member';
+                        processAndOpenCropper(files[0], target);
+                    }
+                });
+            });
         }
 
         function renderHeaderLogo() {
@@ -857,6 +937,8 @@
             }
 
             activeCropTarget = target;
+            flipX = 1;
+
             const modal = document.getElementById('cropModal');
             const spinner = document.getElementById('cropperLoadingSpinner');
             
@@ -897,7 +979,7 @@
                         aspectRatio: 1,
                         viewMode: 1,
                         dragMode: 'move',
-                        autoCropArea: 0.88,
+                        autoCropArea: 0.85,
                         responsive: true,
                         checkOrientation: true,
                         restore: false,
@@ -907,6 +989,10 @@
                         cropBoxMovable: true,
                         cropBoxResizable: true,
                         toggleDragModeOnDblclick: false,
+                        preview: [
+                            document.getElementById('liveCropPreviewCircle'),
+                            document.getElementById('liveCropPreviewSquare')
+                        ],
                         ready() {
                             if (spinner) spinner.classList.add('hidden');
                         }
@@ -933,20 +1019,30 @@
             if (cropperInstance) cropperInstance.rotate(degree);
         }
 
+        function flipCropperX() {
+            if (cropperInstance) {
+                flipX = -flipX;
+                cropperInstance.scaleX(flipX);
+            }
+        }
+
         function zoomCropper(ratio) {
             if (cropperInstance) cropperInstance.zoom(ratio);
         }
 
         function resetCropper() {
-            if (cropperInstance) cropperInstance.reset();
+            if (cropperInstance) {
+                flipX = 1;
+                cropperInstance.reset();
+            }
         }
 
         function applyCrop() {
             if (!cropperInstance) return;
 
             const canvas = cropperInstance.getCroppedCanvas({
-                width: 300,
-                height: 300,
+                width: 250,
+                height: 250,
                 imageSmoothingEnabled: true,
                 imageSmoothingQuality: 'high',
             });
@@ -961,10 +1057,12 @@
             } else if (activeCropTarget === 'member') {
                 document.getElementById('memberAvatarUrl').value = croppedBase64;
                 document.getElementById('avatarPreview').src = croppedBase64;
+                const badge = document.getElementById('avatarStagedBadge');
+                if (badge) badge.classList.remove('hidden');
             }
 
             closeCropperModal();
-            showToast("Đã cắt ảnh đại diện thành công!");
+            showToast("Đã cắt xong ảnh đại diện! Hãy nhấn 'Lưu Thông Tin' để cập nhật.");
         }
 
         function updateRegAvatarFromUrl(url) {
@@ -1128,7 +1226,7 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3200);
         }
 
         function switchTab(tab) {
@@ -1265,7 +1363,14 @@
                         ${isMe ? `<span class="absolute top-3 right-3 bg-lime-500 text-slate-950 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Hồ sơ của bạn</span>` : ''}
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <img src="${m.avatar || 'https://placehold.co/150'}" onerror="this.src='https://placehold.co/150'" class="w-13 h-13 rounded-2xl object-cover border-2 border-slate-100 shadow-sm">
+                                <div class="relative group/avatar cursor-pointer" onclick="${(isAdminLoggedIn || isMe) ? `editMember('${m.id}')` : ''}" title="${(isAdminLoggedIn || isMe) ? 'Chỉnh sửa ảnh' : ''}">
+                                    <img src="${m.avatar || 'https://placehold.co/150'}" onerror="this.src='https://placehold.co/150'" class="w-13 h-13 rounded-2xl object-cover border-2 border-slate-100 shadow-sm">
+                                    ${(isAdminLoggedIn || isMe) ? `
+                                        <div class="absolute inset-0 bg-slate-900/60 rounded-2xl flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition text-white text-xs">
+                                            <i class="fa-solid fa-camera"></i>
+                                        </div>
+                                    ` : ''}
+                                </div>
                                 <div>
                                     <h4 class="font-extrabold text-slate-900 text-sm group-hover:text-lime-700 transition truncate max-w-[140px]">${m.name}</h4>
                                     <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${m.role || 'Thành viên'}</span>
@@ -1414,6 +1519,9 @@
 
         function openMemberModal(member = null) {
             document.getElementById('memberModal').classList.remove('hidden');
+            const badge = document.getElementById('avatarStagedBadge');
+            if (badge) badge.classList.add('hidden');
+
             if (member) {
                 document.getElementById('memberModalTitle').innerText = "Cập Nhật Thành Viên";
                 document.getElementById('memberId').value = member.id;
@@ -1466,7 +1574,13 @@
                 renderMembers();
             }
 
-            showToast("Đã lưu thông tin thành viên!");
+            if (currentLoggedUser && currentLoggedUser.id.toString() === id.toString()) {
+                currentLoggedUser = { ...currentLoggedUser, ...memberObj };
+                sessionStorage.setItem('ecohome_user_session', JSON.stringify(currentLoggedUser));
+                renderHeaderUserBadge();
+            }
+
+            showToast("Đã lưu thông tin & avatar thành viên thành công!");
             closeMemberModal();
         }
 
@@ -1857,6 +1971,7 @@
         window.handleMemberFileSelect = handleMemberFileSelect;
         window.closeCropperModal = closeCropperModal;
         window.rotateCropper = rotateCropper;
+        window.flipCropperX = flipCropperX;
         window.zoomCropper = zoomCropper;
         window.resetCropper = resetCropper;
         window.applyCrop = applyCrop;
