@@ -244,7 +244,11 @@
                         <p class="text-sm text-slate-500 font-medium mt-1">Ghép cặp ngẫu nhiên theo số sân, thể thức thi đấu & xoay vòng nhiều ván cân bằng DUPR</p>
                     </div>
                     <div id="socialDrawAdminControls" class="hidden flex flex-wrap items-center gap-2">
-                        <button onclick="selectAllMembersForSocial(true)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Chọn tất cả</button>
+                        <button onclick="selectAllMembersForSocial(true)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Tất cả</button>
+                        <button onclick="filterMembersByGender('Nam')" class="text-xs font-bold bg-sky-50 hover:bg-sky-100 text-sky-700 px-3 py-2 rounded-xl border border-sky-200 transition">Chỉ Nam</button>
+                        <button onclick="filterMembersByGender('Nữ')" class="text-xs font-bold bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-2 rounded-xl border border-pink-200 transition">Chỉ Nữ</button>
+                        <button onclick="filterMembersByDupr('high')" class="text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-2 rounded-xl border border-amber-200 transition">Hạt Giống (≥3.5)</button>
+                        <button onclick="filterMembersByDupr('low')" class="text-xs font-bold bg-lime-50 hover:bg-lime-100 text-lime-800 px-3 py-2 rounded-xl border border-lime-200 transition">Phong Trào (<3.5)</button>
                         <button onclick="selectAllMembersForSocial(false)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Bỏ chọn</button>
                         <button onclick="clearSocialDrawData()" class="bg-red-50 hover:bg-red-100 text-red-600 font-black px-3.5 py-2.5 rounded-xl text-xs border border-red-200 transition flex items-center gap-1.5 shadow-sm" title="Xóa toàn bộ lịch bốc thăm cũ để làm mới">
                             <i class="fa-solid fa-trash-can"></i> Xóa Dữ Liệu Cũ
@@ -255,7 +259,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200/80">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-200/80">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Số Lượng Sân Thi Đấu</label>
                         <div class="flex items-center gap-2">
@@ -268,13 +272,33 @@
                         <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Thể Thức Cặp Thi Đấu</label>
                         <select id="socialMatchType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
                             <option value="doubles_balanced">Đánh Đôi - Cân bằng DUPR (2 vs 2)</option>
+                            <option value="doubles_random" selected>Đánh Đôi - Trộn Cặp Ngẫu Nhiên (2 vs 2)</option>
                             <option value="doubles_mixed">Đánh Đôi Nam - Nữ (Mixed Doubles)</option>
                             <option value="singles">Đánh Đơn (1 vs 1)</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Số Ván Xoay Vòng (Rounds)</label>
+                        <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Chế Độ Thi Đấu</label>
+                        <select id="socialGameMode" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
+                            <option value="rotation" selected>Xoay Vòng Giao Lưu</option>
+                            <option value="knockout">Loại Trực Tiếp (Knockout)</option>
+                            <option value="king">King of the Court (Leo Tháp Sân)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Tiêu Chuẩn Điểm Thắng</label>
+                        <select id="socialWinScore" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
+                            <option value="11" selected>Đánh 11 Điểm</option>
+                            <option value="15">Đánh 15 Điểm</option>
+                            <option value="21">Đánh 21 Điểm</option>
+                            <option value="15min">Đấu 15 Phút Tính Điểm</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Số Ván Thi Đấu (Rounds)</label>
                         <select id="socialRoundCount" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
                             <option value="1">1 Ván duy nhất</option>
                             <option value="2" selected>2 Ván xoay vòng</option>
@@ -284,6 +308,25 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Giờ Bắt Đầu & Thời Lượng / Ván</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="time" id="socialStartTime" value="17:30" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-lime-500">
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="socialRoundDuration" min="5" max="60" value="20" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs font-black text-center focus:outline-none focus:border-lime-500">
+                                <span class="text-[10px] font-bold text-slate-500">phút</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Chấp Điểm DUPR Tự Động</label>
+                        <select id="socialEnableHandicap" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
+                            <option value="true" selected>Bật (Tự động tính chấp điểm)</option>
+                            <option value="false">Tắt (Thi đấu ngang điểm)</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-2">
                         <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Tên Chuỗi Sân Thi Đấu</label>
                         <input type="text" id="socialCourtPrefix" placeholder="Ví dụ: Sân Ecohome" value="Sân Ecohome" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
                     </div>
@@ -303,7 +346,7 @@
             <div id="socialMatchResults" class="space-y-6">
                 <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm">
                     <i class="fa-solid fa-dice-three text-5xl text-slate-300 mb-3"></i>
-                    <p class="text-slate-500 font-bold text-sm">Chưa có lượt bốc thăm nào. Chọn số lượng sân và nhấn nút "Bốc Thăm Ngẫu Nhiên".</p>
+                    <p class="text-slate-500 font-bold text-sm">Chưa có lượt bốc thăm nào. Chọn thông số và nhấn "Bốc Thăm Ngẫu Nhiên".</p>
                 </div>
             </div>
         </section>
@@ -1367,6 +1410,35 @@
             updateSocialSelectedCount();
         }
 
+        function filterMembersByGender(gender) {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền thao tác!", "error");
+                return;
+            }
+            document.querySelectorAll('.social-member-checkbox').forEach(cb => {
+                const memberId = cb.value.toString();
+                const member = membersData.find(m => m.id.toString() === memberId);
+                cb.checked = member && member.gender === gender;
+            });
+            updateSocialSelectedCount();
+        }
+
+        function filterMembersByDupr(type) {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền thao tác!", "error");
+                return;
+            }
+            document.querySelectorAll('.social-member-checkbox').forEach(cb => {
+                const memberId = cb.value.toString();
+                const member = membersData.find(m => m.id.toString() === memberId);
+                if (member) {
+                    const rating = parseFloat(member.rating || 0);
+                    cb.checked = type === 'high' ? rating >= 3.5 : rating < 3.5;
+                }
+            });
+            updateSocialSelectedCount();
+        }
+
         async function generateRandomSocialMatches() {
             if (!isAdminLoggedIn) {
                 showToast("Chỉ Admin mới có quyền thực hiện bốc thăm ghép sân!", "error");
@@ -1378,6 +1450,12 @@
             let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id.toString()));
 
             const matchType = document.getElementById('socialMatchType').value;
+            const gameMode = document.getElementById('socialGameMode')?.value || 'rotation';
+            const winScore = document.getElementById('socialWinScore')?.value || '11';
+            const startTimeStr = document.getElementById('socialStartTime')?.value || '17:30';
+            const durationMins = parseInt(document.getElementById('socialRoundDuration')?.value) || 20;
+            const enableHandicap = document.getElementById('socialEnableHandicap')?.value === 'true';
+
             const playersPerMatch = matchType === 'singles' ? 2 : 4;
 
             if (selectedPlayers.length < playersPerMatch) {
@@ -1393,16 +1471,21 @@
                 timestamp: Date.now(),
                 courtPrefix: courtPrefix,
                 matchType: matchType,
+                gameMode: gameMode,
+                winScore: winScore,
+                startTime: startTimeStr,
+                duration: durationMins,
+                enableHandicap: enableHandicap,
                 selectedCount: selectedPlayers.length,
                 rounds: []
             };
 
-            // Smart rotation tracker to minimize repeat partner/opponent pairings
+            const [startHour, startMin] = startTimeStr.split(':').map(Number);
+
             for (let r = 1; r <= roundCount; r++) {
                 let pool = [...selectedPlayers];
 
                 if (matchType === 'doubles_mixed') {
-                    // Smart Mixed Doubles balancing
                     const males = pool.filter(p => p.gender === 'Nam').sort(() => Math.random() - 0.5);
                     const females = pool.filter(p => p.gender === 'Nữ').sort(() => Math.random() - 0.5);
                     pool = [];
@@ -1411,19 +1494,31 @@
                         pool.push(males[i], females[i]);
                     }
                 } else if (matchType === 'doubles_balanced') {
-                    // Smart DUPR Balancing: Tiered Pairing (Top DUPR paired with Lower DUPR)
                     pool.sort((a,b) => (parseFloat(b.rating)||0) - (parseFloat(a.rating)||0));
-                    // Introduce round offset rotation for variation across rounds
                     if (r > 1) {
                         const shift = (r - 1) % pool.length;
                         pool = pool.slice(shift).concat(pool.slice(0, shift));
                     }
                 } else {
+                    // Trộn cặp ngẫu nhiên hoàn toàn cho từng ván (doubles_random & singles)
                     pool.sort(() => Math.random() - 0.5);
                 }
 
+                // Compute round schedule times
+                const roundStartMinTotal = (startHour * 60) + startMin + ((r - 1) * durationMins);
+                const roundEndMinTotal = roundStartMinTotal + durationMins;
+
+                const formatTime = (mins) => {
+                    const h = Math.floor(mins / 60) % 24;
+                    const m = mins % 60;
+                    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                };
+
+                const timeSlot = `${formatTime(roundStartMinTotal)} - ${formatTime(roundEndMinTotal)}`;
+
                 const roundData = {
                     roundNum: r,
+                    timeSlot: timeSlot,
                     courts: [],
                     waiting: []
                 };
@@ -1440,15 +1535,32 @@
                         teamA = [matchPlayers[0]];
                         teamB = [matchPlayers[1]];
                     } else {
-                        // Smart pairing: Tier 1 + Tier 4 vs Tier 2 + Tier 3 for tight games
                         teamA = [matchPlayers[0], matchPlayers[3] || matchPlayers[2]];
                         teamB = [matchPlayers[1], matchPlayers[2] || matchPlayers[3]];
+                    }
+
+                    // Auto DUPR Handicap Calculation
+                    let handicapInfo = null;
+                    if (enableHandicap) {
+                        const avgA = teamA.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / teamA.length;
+                        const avgB = teamB.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / teamB.length;
+                        const diff = Math.abs(avgA - avgB);
+                        const handicapPts = Math.min(4, Math.round(diff * 2.5));
+
+                        if (handicapPts > 0) {
+                            if (avgA < avgB) {
+                                handicapInfo = { team: 'A', pts: handicapPts, text: `🎁 Đội A được chấp +${handicapPts} điểm` };
+                            } else if (avgB < avgA) {
+                                handicapInfo = { team: 'B', pts: handicapPts, text: `🎁 Đội B được chấp +${handicapPts} điểm` };
+                            }
+                        }
                     }
 
                     roundData.courts.push({
                         courtNum: c,
                         teamA: teamA,
-                        teamB: teamB
+                        teamB: teamB,
+                        handicap: handicapInfo
                     });
                 }
 
@@ -1461,7 +1573,7 @@
             if (isAuthReady) {
                 try {
                     await setDoc(socialDocRef, newDrawData);
-                    showToast(`Đã bốc thăm ngẫu nhiên & đồng bộ Realtime Cloud!`);
+                    showToast(`Đã bốc thăm & đồng bộ Cloud công khai!`);
                 } catch(err) {
                     console.error("Lỗi lưu bốc thăm Cloud", err);
                     showToast("Đã bốc thăm ngẫu nhiên (Lưu nội bộ)", "info");
@@ -1472,6 +1584,25 @@
             }
         }
 
+        async function clearSocialDrawData() {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền xóa dữ liệu bốc thăm!", "error");
+                return;
+            }
+            customConfirm("Xóa Dữ Liệu Bốc Thăm", "Bạn có chắc chắn muốn xóa toàn bộ lịch bốc thăm hiện tại?", async () => {
+                currentSocialDraw = null;
+                if (isAuthReady) {
+                    try {
+                        await deleteDoc(socialDocRef);
+                    } catch (err) {
+                        console.error("Error clearing social draw:", err);
+                    }
+                }
+                renderSocialMatchResults();
+                showToast("Đã xóa toàn bộ lịch bốc thăm cũ!", "info");
+            });
+        }
+
         function renderSocialMatchResults() {
             const resultsContainer = document.getElementById('socialMatchResults');
             if (!resultsContainer) return;
@@ -1480,21 +1611,26 @@
                 resultsContainer.innerHTML = `
                     <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm">
                         <i class="fa-solid fa-dice-three text-5xl text-slate-300 mb-3"></i>
-                        <p class="text-slate-500 font-bold text-sm">Chưa có lượt bốc thăm nào. Chọn số lượng sân và nhấn nút "Bốc Thăm Ngẫu Nhiên".</p>
+                        <p class="text-slate-500 font-bold text-sm">Chưa có lượt bốc thăm nào. Chọn số lượng sân và nhấn "Bốc Thăm Ngẫu Nhiên".</p>
                     </div>`;
                 return;
             }
 
             resultsContainer.innerHTML = '';
             
-            // Add Timestamp & Sharing Action Header
             const timeStr = new Date(currentSocialDraw.timestamp).toLocaleString('vi-VN');
+            const winScoreLabel = currentSocialDraw.winScore === '15min' ? 'Đấu 15 phút' : `Thắng ${currentSocialDraw.winScore || 11} điểm`;
+            
+            const gameModeText = currentSocialDraw.gameMode === 'knockout' ? 'Loại Trực Tiếp' : (currentSocialDraw.gameMode === 'king' ? 'King of the Court' : 'Xoay Vòng Giao Lưu');
+
             const headerInfo = document.createElement('div');
             headerInfo.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500 font-bold bg-slate-50 p-4 rounded-2xl border border-slate-200/80 mb-2";
             headerInfo.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="bg-lime-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-[11px]">LỊCH BỐC THĂM MỚI NHẤT</span>
-                    <span><i class="fa-solid fa-cloud text-sky-500 mr-1"></i> Đồng bộ: ${timeStr} (${currentSocialDraw.selectedCount} VĐV)</span>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="bg-lime-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-[11px] shadow-xs">🔴 LỊCH BỐC THĂM CÔNG KHAI REALTIME</span>
+                    <span class="bg-slate-200 text-slate-800 px-2 py-0.5 rounded-md text-[10px] uppercase font-black">${gameModeText}</span>
+                    <span class="bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-md text-[10px] font-black">${winScoreLabel}</span>
+                    <span><i class="fa-solid fa-cloud text-sky-500 mr-1"></i> ${timeStr} (${currentSocialDraw.selectedCount} VĐV)</span>
                 </div>
                 <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                     <button onclick="copySocialDrawToClipboard()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold px-3 py-1.5 rounded-xl border border-sky-200 transition flex items-center gap-1.5 shadow-xs">
@@ -1514,11 +1650,12 @@
                 roundBox.className = "bg-white border border-slate-200/90 p-6 rounded-3xl space-y-4 shadow-sm";
                 
                 let roundHeader = `
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
                         <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
                             <span class="bg-lime-500 text-slate-950 text-xs px-3 py-1 rounded-xl font-black shadow-sm">VÁN ${rData.roundNum}</span> 
-                            <span>Phân Bổ Sân Thi Đấu Giao Lưu</span>
+                            <span>Phân Bổ Sân Thi Đấu</span>
                         </h3>
+                        ${rData.timeSlot ? `<span class="bg-sky-50 text-sky-800 border border-sky-200 font-black text-xs px-3 py-1 rounded-xl flex items-center gap-1.5 shadow-xs"><i class="fa-solid fa-clock text-sky-600"></i> ${rData.timeSlot}</span>` : ''}
                     </div>
                 `;
 
@@ -1531,7 +1668,8 @@
                     const matchTypeLabel = currentSocialDraw.matchType === 'singles' ? 'Trận Đơn' : 'Trận Đôi';
 
                     const courtCard = document.createElement('div');
-                    courtCard.className = "bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-lime-500/80 transition";
+                    courtCard.className = "bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-lime-500/80 transition relative";
+                    
                     courtCard.innerHTML = `
                         <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-200">
                             <span class="text-xs font-black text-sky-700 flex items-center gap-1.5 uppercase tracking-wide">
@@ -1541,6 +1679,12 @@
                                 ${matchTypeLabel}
                             </span>
                         </div>
+
+                        ${court.handicap ? `
+                        <div class="mb-3 text-[10px] font-black text-amber-900 bg-amber-100 border border-amber-300 rounded-xl px-2.5 py-1 text-center shadow-xs flex items-center justify-center gap-1">
+                            <span>${court.handicap.text}</span>
+                        </div>
+                        ` : ''}
 
                         <div class="grid grid-cols-2 gap-3 items-center relative">
                             <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-xs">
@@ -1582,43 +1726,29 @@
             });
         }
 
-        async function clearSocialDrawData() {
-            if (!isAdminLoggedIn) {
-                showToast("Chỉ Admin mới có quyền xóa dữ liệu bốc thăm!", "error");
-                return;
-            }
-
-            customConfirm("Xóa Dữ Liệu Bốc Thăm", "Bạn có chắc chắn muốn xóa toàn bộ kết quả bốc thăm hiện tại để làm mới không?", async () => {
-                currentSocialDraw = null;
-                if (isAuthReady) {
-                    try {
-                        await deleteDoc(socialDocRef);
-                    } catch (err) {
-                        console.error("Lỗi xóa dữ liệu Firestore:", err);
-                        await setDoc(socialDocRef, {});
-                    }
-                }
-                renderSocialMatchResults();
-                showToast("Đã xóa toàn bộ dữ liệu bốc thăm cũ!", "info");
-            });
-        }
-
         function copySocialDrawToClipboard() {
             if (!currentSocialDraw || !currentSocialDraw.rounds || currentSocialDraw.rounds.length === 0) {
                 showToast("Không có kết quả bốc thăm để sao chép!", "error");
                 return;
             }
 
+            const winScoreLabel = currentSocialDraw.winScore === '15min' ? 'Đấu 15 phút tính điểm' : `Thắng ${currentSocialDraw.winScore || 11} điểm`;
+
             let text = `🎾 *LỊCH BỐC THĂM PHÂN SÂN - ECOHOME NHƠN BÌNH* 🎾\n`;
             text += `⏱️ *Thời gian:* ${new Date(currentSocialDraw.timestamp).toLocaleString('vi-VN')}\n`;
-            text += `👥 *Tổng số VĐV:* ${currentSocialDraw.selectedCount} người\n\n`;
+            text += `👥 *Tổng số VĐV:* ${currentSocialDraw.selectedCount} người\n`;
+            text += `🏆 *Tiêu chuẩn:* ${winScoreLabel}\n\n`;
 
             currentSocialDraw.rounds.forEach(r => {
-                text += `📌 *VÁN ${r.roundNum}:*\n`;
+                text += `📌 *VÁN ${r.roundNum}* ${r.timeSlot ? `(${r.timeSlot})` : ''}:\n`;
                 r.courts.forEach(c => {
                     const teamAStr = c.teamA.map(p => p.name).join(' & ');
                     const teamBStr = c.teamB.map(p => p.name).join(' & ');
-                    text += `• ${currentSocialDraw.courtPrefix} ${c.courtNum}: ${teamAStr}  VS  ${teamBStr}\n`;
+                    let line = `• ${currentSocialDraw.courtPrefix} ${c.courtNum}: ${teamAStr}  VS  ${teamBStr}`;
+                    if (c.handicap) {
+                        line += ` (${c.handicap.text})`;
+                    }
+                    text += `${line}\n`;
                 });
                 if (r.waiting && r.waiting.length > 0) {
                     text += `⏳ *Nghỉ ván ${r.roundNum}:* ${r.waiting.map(p => p.name).join(', ')}\n`;
@@ -1628,7 +1758,6 @@
 
             text += `🔥 Chúc anh chị em thi đấu vui vẻ & nâng cao tay nghề! 🔥`;
 
-            // Fallback execCommand copy for iframe compatibility
             const textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.style.position = "fixed";
@@ -1639,7 +1768,7 @@
 
             try {
                 document.execCommand('copy');
-                showToast("Đã sao chép danh sách bốc thăm! Bạn có thể dán (Paste) vào Zalo ngay.");
+                showToast("Đã sao chép lịch bốc thăm kèm giờ & chấp điểm! Bạn có thể dán (Paste) vào Zalo ngay.");
             } catch (err) {
                 showToast("Không thể sao chép văn bản", "error");
             }
@@ -2591,6 +2720,8 @@
         window.deleteMember = deleteMember;
         window.renderMembers = renderMembers;
         window.selectAllMembersForSocial = selectAllMembersForSocial;
+        window.filterMembersByGender = filterMembersByGender;
+        window.filterMembersByDupr = filterMembersByDupr;
         window.updateSocialSelectedCount = updateSocialSelectedCount;
         window.generateRandomSocialMatches = generateRandomSocialMatches;
         window.openScoreModal = openScoreModal;
