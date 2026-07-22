@@ -90,8 +90,8 @@
             <div class="flex items-center justify-between h-20">
                 <!-- Club Logo & Title -->
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-lime-500 to-sky-500 p-0.5 shadow-md shadow-brand-500/20">
-                        <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+                    <div id="clubLogoContainer" class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 via-lime-500 to-sky-500 p-0.5 shadow-md shadow-brand-500/20 overflow-hidden relative group">
+                        <div id="clubLogoContent" class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center overflow-hidden">
                             <i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl animate-pulse"></i>
                         </div>
                     </div>
@@ -102,12 +102,12 @@
                             </h1>
                             <span class="bg-lime-500 text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">PICKLEBALL</span>
                         </div>
-                        <p class="text-xs text-slate-500 font-semibold hidden sm:block">CLB Pickleball Thể Thao Đăng Cấp • Quản Lý Sân & Giải Đấu</p>
+                        <p class="text-xs text-slate-500 font-semibold hidden sm:block">CLB Pickleball Thể Thao Đẳng Cấp • Quản Lý Sân & Giải Đấu</p>
                     </div>
                 </div>
 
                 <!-- Navigation Tabs & Auth -->
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 sm:gap-3">
                     <nav class="hidden md:flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80">
                         <button onclick="switchTab('members')" id="tab-members" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">
                             <i class="fa-solid fa-users mr-1.5 text-lime-600"></i>Thành Viên
@@ -120,16 +120,22 @@
                         </button>
                     </nav>
 
+                    <!-- Admin Change Logo Action -->
+                    <button id="changeLogoBtn" onclick="openLogoModal()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-1.5 border border-slate-200 shadow-sm">
+                        <i class="fa-solid fa-image text-lime-600"></i>
+                        <span class="hidden sm:inline">Đổi Logo</span>
+                    </button>
+
                     <!-- Member Auth Status -->
                     <div id="userProfileHeaderContainer" class="flex items-center gap-2">
                         <button id="userAuthBtn" onclick="toggleUserAuthModal()" class="flex items-center gap-2 bg-lime-500/10 hover:bg-lime-500/20 text-lime-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-lime-500/30 transition shadow-sm">
                             <i class="fa-solid fa-user-plus"></i>
-                            <span>Đăng ký / Đăng nhập</span>
+                            <span class="hidden sm:inline">Đăng ký / Đăng nhập</span>
                         </button>
                     </div>
 
                     <!-- Admin Auth Button -->
-                    <button id="adminBtn" onclick="toggleAdminModal()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-slate-800 transition shadow-sm">
+                    <button id="adminBtn" onclick="toggleAdminModal()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-800 transition-all duration-150 shadow-sm touch-manipulation">
                         <i id="adminIcon" class="fa-solid fa-lock text-lime-400"></i>
                         <span id="adminText">Admin</span>
                     </button>
@@ -205,6 +211,7 @@
             </div>
         </section>
 
+        <!-- ================= TAB 2: RANDOM MATCH GENERATOR ================= -->
         <section id="social-section" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -280,6 +287,7 @@
             </div>
         </section>
 
+        <!-- ================= TAB 3: TOURNAMENT BRACKET ================= -->
         <section id="bracket-section" class="hidden space-y-6">
             <div class="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -323,28 +331,83 @@
 
 
     <!-- 1. ADMIN LOGIN MODAL -->
-    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
-            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <div class="text-center mb-6">
-                <div class="w-14 h-14 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-lime-300">
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none modal-backdrop">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl relative transition-all duration-300 scale-95 modal-content max-h-[92vh] overflow-y-auto my-auto">
+            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 w-10 h-10 flex items-center justify-center rounded-full active:bg-slate-100 transition active:scale-90 touch-manipulation"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div class="text-center mb-5 sm:mb-6">
+                <div class="w-14 h-14 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-lime-300 shadow-sm">
                     <i class="fa-solid fa-user-shield text-lime-700 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900">Xác Thực Quản Trị Viên</h3>
-                <p class="text-xs text-slate-500 font-medium mt-1">Nhập mật khẩu Admin và nhấn ENTER để vào hệ thống</p>
+                <h3 class="text-lg sm:text-xl font-black text-slate-900">Xác Thực Quản Trị Viên</h3>
+                <p class="text-xs text-slate-500 font-medium mt-1">Nhập mật khẩu Admin và nhấn ENTER / Nhập trên bàn phím điện thoại</p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <input type="password" id="adminPasswordInput" required placeholder="Nhập mật khẩu Admin..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-lime-500">
+                <div class="relative">
+                    <input type="password" id="adminPasswordInput" required placeholder="Nhập mật khẩu Admin..." enterkeyhint="go" autocomplete="current-password" class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-4 pr-12 py-3.5 text-base font-bold text-slate-900 focus:outline-none focus:border-lime-500 focus:bg-white transition shadow-inner">
+                    <button type="button" onclick="togglePasswordVisibility('adminPasswordInput', 'adminEyeIcon')" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 w-10 h-10 flex items-center justify-center focus:outline-none rounded-xl active:bg-slate-100 touch-manipulation">
+                        <i id="adminEyeIcon" class="fa-solid fa-eye text-base"></i>
+                    </button>
                 </div>
-                <button type="submit" class="w-full bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-3 rounded-xl text-sm transition shadow-md shadow-lime-500/20">
-                    Xác Nhận (ENTER)
+                <button type="submit" class="w-full bg-lime-500 hover:bg-lime-400 active:bg-lime-600 active:scale-[0.98] text-slate-950 font-black py-3.5 rounded-2xl text-base transition-all duration-150 shadow-md shadow-lime-500/20 flex items-center justify-center gap-2 touch-manipulation">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Xác Nhận (ENTER)</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- 2. MEMBER AUTH MODAL (LOGIN & REGISTER) -->
+    <!-- 2. LOGO UPLOAD MODAL FOR ADMIN -->
+    <div id="logoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
+            <button onclick="closeLogoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 bg-lime-100 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-lime-300 shadow-sm">
+                    <i class="fa-solid fa-camera text-lime-700 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Thay Đổi Logo CLB</h3>
+                <p class="text-xs text-slate-500 font-medium mt-1">Tải file từ thiết bị hoặc dán URL đường dẫn hình ảnh logo mới</p>
+            </div>
+
+            <form onsubmit="saveClubLogo(event)" class="space-y-4">
+                <!-- Preview Box -->
+                <div class="flex items-center justify-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div class="w-20 h-20 rounded-2xl overflow-hidden relative flex items-center justify-center bg-slate-900 border-2 border-lime-500 shadow-md">
+                        <img id="logoPreviewImg" src="" class="w-full h-full object-cover hidden">
+                        <div id="logoPreviewFallback" class="flex items-center justify-center">
+                            <i class="fa-solid fa-table-tennis-paddle-ball text-lime-400 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1">Tải File Ảnh Từ Máy Tính / Điện Thoại</label>
+                    <input type="file" id="logoFileInput" accept="image/*" onchange="handleLogoFileSelect(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-lime-500 file:text-slate-950 hover:file:bg-lime-400 cursor-pointer">
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase">Hoặc</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1">Dán URL Đường Dẫn Hình Ảnh</label>
+                    <input type="text" id="logoUrlInput" oninput="updateLogoPreviewFromUrl(this.value)" placeholder="https://domain.com/logo.png" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-lime-500">
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="resetToDefaultLogo()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
+                        Khôi Phục Mặc Định
+                    </button>
+                    <button type="submit" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition shadow-md shadow-lime-500/20">
+                        Lưu Logo Mới
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. MEMBER AUTH MODAL (LOGIN & REGISTER) -->
     <div id="userAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="toggleUserAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -430,7 +493,7 @@
         </div>
     </div>
 
-    <!-- 3. ADD/EDIT MEMBER MODAL -->
+    <!-- 4. ADD/EDIT MEMBER MODAL -->
     <div id="memberModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeMemberModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -491,7 +554,7 @@
         </div>
     </div>
 
-    <!-- 4. SCORE & COURT INPUT MODAL FOR BRACKET -->
+    <!-- 5. SCORE & COURT INPUT MODAL FOR BRACKET -->
     <div id="scoreModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
             <button onclick="closeScoreModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -550,12 +613,15 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'pick-4d414';
         const membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
         const bracketDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament', 'currentBracket');
+        const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'clubConfig');
 
         /* ================= STATE MANAGEMENT ================= */
         const ADMIN_PASSWORD_HASH = "215151365"; 
         let isAdminLoggedIn = false;
         let currentLoggedUser = null; 
         let isAuthReady = false;
+        let clubLogoUrl = "";
+        let tempLogoDataUrl = "";
 
         let membersData = [
             { id: "1", name: "Nguyễn Văn Hùng", rating: 4.2, gender: "Nam", phone: "0905123456", password: "123", role: "Ban Quản Lý", hand: "Tay Phải", position: "Bên Trái (Left)", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
@@ -615,6 +681,17 @@
                     try { currentLoggedUser = JSON.parse(savedSession); } catch(e){}
                 }
 
+                // Listen to Club Config (Logo)
+                onSnapshot(configDocRef, (docSnap) => {
+                    if (docSnap.exists() && docSnap.data().logoUrl) {
+                        clubLogoUrl = docSnap.data().logoUrl;
+                    } else {
+                        clubLogoUrl = "";
+                    }
+                    renderHeaderLogo();
+                }, (err) => console.error("Config error:", err));
+
+                // Listen to Members
                 onSnapshot(membersColRef, (snapshot) => {
                     if (snapshot.empty) {
                         membersData.forEach(async (m) => {
@@ -636,10 +713,10 @@
                     }
                 }, (error) => console.error("Members error:", error));
 
+                // Listen to Bracket
                 onSnapshot(bracketDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        // Auto-convert legacy nested array format if present in DB
                         if (data.rounds && Array.isArray(data.rounds) && data.rounds.length > 0 && Array.isArray(data.rounds[0])) {
                             data.rounds = data.rounds.map((mList, idx) => ({
                                 roundName: idx === 0 ? "Vòng Tứ Kết" : idx === 1 ? "Vòng Bán Kết" : "Trận Chung Kết",
@@ -659,6 +736,184 @@
         }
 
         window.addEventListener('DOMContentLoaded', initApp);
+
+        function renderHeaderLogo() {
+            const logoContent = document.getElementById('clubLogoContent');
+            if (!logoContent) return;
+
+            if (clubLogoUrl) {
+                logoContent.innerHTML = `<img src="${clubLogoUrl}" alt="Ecohome Pickleball Logo" class="w-full h-full object-cover">`;
+            } else {
+                logoContent.innerHTML = `<i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl animate-pulse"></i>`;
+            }
+        }
+
+        /* ================= LOGO UPLOAD MANAGEMENT ================= */
+        function openLogoModal() {
+            tempLogoDataUrl = clubLogoUrl || "";
+            const modal = document.getElementById('logoModal');
+            const urlInput = document.getElementById('logoUrlInput');
+            const fileInput = document.getElementById('logoFileInput');
+            
+            if (fileInput) fileInput.value = "";
+            if (urlInput) urlInput.value = clubLogoUrl.startsWith('data:') ? '' : clubLogoUrl;
+            
+            updateLogoPreviewDisplay(tempLogoDataUrl);
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeLogoModal() {
+            const modal = document.getElementById('logoModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function updateLogoPreviewDisplay(src) {
+            const previewImg = document.getElementById('logoPreviewImg');
+            const previewFallback = document.getElementById('logoPreviewFallback');
+
+            if (src) {
+                previewImg.src = src;
+                previewImg.classList.remove('hidden');
+                previewFallback.classList.add('hidden');
+            } else {
+                previewImg.classList.add('hidden');
+                previewFallback.classList.remove('hidden');
+            }
+        }
+
+        function updateLogoPreviewFromUrl(url) {
+            tempLogoDataUrl = url.trim();
+            updateLogoPreviewDisplay(tempLogoDataUrl);
+        }
+
+        function handleLogoFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 300;
+                    const MAX_HEIGHT = 300;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    tempLogoDataUrl = canvas.toDataURL('image/png', 0.85);
+                    document.getElementById('logoUrlInput').value = '';
+                    updateLogoPreviewDisplay(tempLogoDataUrl);
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetToDefaultLogo() {
+            tempLogoDataUrl = "";
+            document.getElementById('logoUrlInput').value = "";
+            document.getElementById('logoFileInput').value = "";
+            updateLogoPreviewDisplay("");
+        }
+
+        async function saveClubLogo(e) {
+            e.preventDefault();
+            const urlInputValue = document.getElementById('logoUrlInput').value.trim();
+            const logoToSave = tempLogoDataUrl || urlInputValue || "";
+
+            try {
+                if (isAuthReady) {
+                    await setDoc(configDocRef, { logoUrl: logoToSave }, { merge: true });
+                }
+                clubLogoUrl = logoToSave;
+                renderHeaderLogo();
+                closeLogoModal();
+                showToast("Đã cập nhật Logo website CLB thành công!");
+            } catch(err) {
+                console.error("Save logo error:", err);
+                showToast("Lỗi khi lưu Logo, vui lòng thử lại!", "error");
+            }
+        }
+
+        /* ================= MODALS & UI HELPERS ================= */
+        function toggleModalAnimation(modalId, show) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            const content = modal.querySelector('.modal-content');
+
+            if (show) {
+                modal.classList.remove('pointer-events-none', 'opacity-0');
+                modal.classList.add('opacity-100');
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.remove('opacity-100');
+                if (content) {
+                    content.classList.remove('scale-100');
+                    content.classList.add('scale-95');
+                }
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const adminModal = document.getElementById('adminModal');
+                if (adminModal && !adminModal.classList.contains('pointer-events-none')) {
+                    toggleModalAnimation('adminModal', false);
+                }
+                const logoModal = document.getElementById('logoModal');
+                if (logoModal && !logoModal.classList.contains('hidden')) {
+                    closeLogoModal();
+                }
+                const userAuthModal = document.getElementById('userAuthModal');
+                if (userAuthModal && !userAuthModal.classList.contains('hidden')) {
+                    userAuthModal.classList.add('hidden');
+                }
+                const memberModal = document.getElementById('memberModal');
+                if (memberModal && !memberModal.classList.contains('hidden')) {
+                    closeMemberModal();
+                }
+                const scoreModal = document.getElementById('scoreModal');
+                if (scoreModal && !scoreModal.classList.contains('hidden')) {
+                    closeScoreModal();
+                }
+            }
+        });
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -706,22 +961,41 @@
                 updateAdminUI();
                 showToast("Đã thoát chế độ Admin", "info");
             } else {
-                document.getElementById('adminModal').classList.toggle('hidden');
-                document.getElementById('adminPasswordInput').focus();
+                const modal = document.getElementById('adminModal');
+                if (modal) {
+                    const isOpening = modal.classList.contains('pointer-events-none');
+                    toggleModalAnimation('adminModal', isOpening);
+                    if (isOpening) {
+                        if (navigator.vibrate) navigator.vibrate(20);
+                        setTimeout(() => {
+                            const input = document.getElementById('adminPasswordInput');
+                            if (input) input.focus();
+                        }, 150);
+                    }
+                }
             }
         }
 
         function handleAdminLogin(e) {
             e.preventDefault();
-            const input = document.getElementById('adminPasswordInput').value;
-            if (input === ADMIN_PASSWORD_HASH) {
+            const input = document.getElementById('adminPasswordInput');
+            const passwordVal = input ? input.value : '';
+            
+            if (input) input.blur();
+
+            if (passwordVal === ADMIN_PASSWORD_HASH) {
                 isAdminLoggedIn = true;
                 updateAdminUI();
-                toggleAdminModal();
-                document.getElementById('adminPasswordInput').value = '';
+                toggleModalAnimation('adminModal', false);
+                if (input) input.value = '';
+                if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
                 showToast("Đăng nhập Admin thành công!");
             } else {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 showToast("Sai mật khẩu Admin!", "error");
+                if (input) {
+                    setTimeout(() => input.focus(), 300);
+                }
             }
         }
 
@@ -731,6 +1005,7 @@
             const adminText = document.getElementById('adminText');
             const addMemberBtn = document.getElementById('addMemberBtn');
             const setupBracketBtn = document.getElementById('setupBracketBtn');
+            const changeLogoBtn = document.getElementById('changeLogoBtn');
 
             if (isAdminLoggedIn) {
                 adminBtn.className = "flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-slate-950 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black border border-lime-400 transition shadow-sm";
@@ -738,12 +1013,14 @@
                 adminText.innerText = "Thoát Admin";
                 addMemberBtn?.classList.remove('hidden');
                 setupBracketBtn?.classList.remove('hidden');
+                changeLogoBtn?.classList.remove('hidden');
             } else {
                 adminBtn.className = "flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-slate-800 transition shadow-sm";
                 adminIcon.className = "fa-solid fa-lock text-lime-400";
                 adminText.innerText = "Admin";
                 addMemberBtn?.classList.add('hidden');
                 setupBracketBtn?.classList.add('hidden');
+                changeLogoBtn?.classList.add('hidden');
             }
             renderMembers();
             renderBracket();
@@ -934,7 +1211,7 @@
                 container.innerHTML = `
                     <button id="userAuthBtn" onclick="toggleUserAuthModal()" class="flex items-center gap-2 bg-lime-500/10 hover:bg-lime-500/20 text-lime-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-lime-500/30 transition shadow-sm">
                         <i class="fa-solid fa-user-plus"></i>
-                        <span>Đăng ký / Đăng nhập</span>
+                        <span class="hidden sm:inline">Đăng ký / Đăng nhập</span>
                     </button>
                 `;
             }
@@ -1069,7 +1346,6 @@
             const resultsContainer = document.getElementById('socialMatchResults');
             resultsContainer.innerHTML = '';
 
-            // Multi-round match generation
             for (let r = 1; r <= roundCount; r++) {
                 const roundBox = document.createElement('div');
                 roundBox.className = "bg-white border border-slate-200/90 p-6 rounded-3xl space-y-4 shadow-sm";
@@ -1353,7 +1629,15 @@
 
         window.switchTab = switchTab;
         window.toggleAdminModal = toggleAdminModal;
+        window.toggleModalAnimation = toggleModalAnimation;
+        window.togglePasswordVisibility = togglePasswordVisibility;
         window.handleAdminLogin = handleAdminLogin;
+        window.openLogoModal = openLogoModal;
+        window.closeLogoModal = closeLogoModal;
+        window.handleLogoFileSelect = handleLogoFileSelect;
+        window.updateLogoPreviewFromUrl = updateLogoPreviewFromUrl;
+        window.resetToDefaultLogo = resetToDefaultLogo;
+        window.saveClubLogo = saveClubLogo;
         window.toggleUserAuthModal = toggleUserAuthModal;
         window.switchUserAuthTab = switchUserAuthTab;
         window.handleMemberRegister = handleMemberRegister;
