@@ -35,6 +35,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Cropper.js CSS & JS for Image Cropping -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     
     <style>
         body {
@@ -44,7 +47,6 @@
             min-height: 100vh;
         }
 
-        /* Pickleball Court Texture Accents */
         .court-bg-pattern {
             background-color: #ffffff;
             background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px), radial-gradient(#cbd5e1 0.75px, #ffffff 0.75px);
@@ -65,6 +67,15 @@
             border-color: #84cc16;
             transform: translateY(-2px);
             box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.25);
+        }
+
+        /* Custom Cropper Modal Styling */
+        .cropper-container {
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .cropper-view-box, .cropper-face {
+            border-radius: 1rem;
         }
 
         ::-webkit-scrollbar {
@@ -230,7 +241,6 @@
                     </div>
                 </div>
 
-                <!-- Customized Court & Match Configuration Panel -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200/80">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-600 uppercase mb-1.5">Số Lượng Sân Thi Đấu</label>
@@ -266,7 +276,6 @@
                     </div>
                 </div>
 
-                <!-- Participant Checklist -->
                 <div class="mt-6">
                     <div class="flex items-center justify-between mb-2">
                         <label class="block text-xs font-extrabold text-slate-600 uppercase">Danh Sách Tham Gia Bốc Thăm:</label>
@@ -278,7 +287,6 @@
                 </div>
             </div>
 
-            <!-- Social Match Results Display -->
             <div id="socialMatchResults" class="space-y-6">
                 <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm">
                     <i class="fa-solid fa-dice-three text-5xl text-slate-300 mb-3"></i>
@@ -313,7 +321,6 @@
                 </div>
             </div>
 
-            <!-- Interactive Bracket Tree Canvas -->
             <div class="bg-white border border-slate-200/90 rounded-3xl p-6 overflow-x-auto min-h-[520px] shadow-sm">
                 <div id="bracketTreeContainer" class="flex items-center min-w-[850px] justify-between gap-12 py-6">
                     <!-- Dynamic Bracket Columns -->
@@ -369,7 +376,6 @@
             </div>
 
             <form onsubmit="saveClubLogo(event)" class="space-y-4">
-                <!-- Preview Box -->
                 <div class="flex items-center justify-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
                     <div class="w-20 h-20 rounded-2xl overflow-hidden relative flex items-center justify-center bg-slate-900 border-2 border-lime-500 shadow-md">
                         <img id="logoPreviewImg" src="" class="w-full h-full object-cover hidden">
@@ -407,7 +413,55 @@
         </div>
     </div>
 
-    <!-- 3. MEMBER AUTH MODAL (LOGIN & REGISTER) -->
+    <!-- 3. IMAGE CROPPING TOOL MODAL -->
+    <div id="cropModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-5 sm:p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onclick="closeCropperModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 w-9 h-9 flex items-center justify-center rounded-full active:bg-slate-100 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="mb-4">
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-crop-simple text-lime-600"></i> Cắt Ảnh Đại Diện
+                </h3>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">Di chuyển, xoay và thu phóng khung cắt vuông cho vừa chuẩn gương mặt</p>
+            </div>
+
+            <!-- Cropper Canvas Container -->
+            <div class="relative w-full h-64 sm:h-80 bg-slate-900 rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
+                <img id="cropperImg" class="max-w-full max-h-full block">
+            </div>
+
+            <!-- Cropper Controls Bar -->
+            <div class="flex items-center justify-between gap-2 mb-5 bg-slate-50 p-2 rounded-2xl border border-slate-200">
+                <div class="flex items-center gap-1">
+                    <button type="button" onclick="rotateCropper(-90)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Xoay trái 90°">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button type="button" onclick="rotateCropper(90)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Xoay phải 90°">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                    <button type="button" onclick="zoomCropper(0.1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Phóng to">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    </button>
+                    <button type="button" onclick="zoomCropper(-0.1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Thu nhỏ">
+                        <i class="fa-solid fa-magnifying-glass-minus"></i>
+                    </button>
+                </div>
+                <button type="button" onclick="resetCropper()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 font-extrabold text-xs border border-slate-200 active:scale-95 transition">
+                    <i class="fa-solid fa-arrow-rotate-left mr-1"></i>Đặt lại
+                </button>
+            </div>
+
+            <!-- Cropper Actions -->
+            <div class="flex gap-3">
+                <button type="button" onclick="closeCropperModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs transition">Hủy</button>
+                <button type="button" onclick="applyCrop()" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-2xl text-xs transition shadow-md shadow-lime-500/20 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check"></i> Cắt & Áp Dụng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MEMBER AUTH MODAL (LOGIN & REGISTER WITH INTEGRATED IMAGE CROPPER) -->
     <div id="userAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="toggleUserAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -436,12 +490,30 @@
                 </button>
             </form>
 
-            <!-- REGISTER FORM -->
+            <!-- REGISTER FORM WITH IMAGE UPLOAD & CROPPER -->
             <form id="memberRegisterForm" onsubmit="handleMemberRegister(event)" class="space-y-4 hidden">
+                <!-- Image Upload & Crop Area -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-extrabold text-slate-600">Ảnh Đại Diện Thành Viên *</label>
+                    <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm">
+                            <img id="regAvatarPreview" src="https://placehold.co/200x200/f1f5f9/65a30d?text=Avatar" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 space-y-1.5">
+                            <label class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-crop-simple"></i> Tải & Cắt Ảnh từ máy
+                                <input type="file" id="regAvatarFileInput" accept="image/*" onchange="handleRegFileSelect(event)" class="hidden">
+                            </label>
+                            <input type="text" id="regAvatar" placeholder="Hoặc dán URL đường dẫn ảnh..." oninput="updateRegAvatarFromUrl(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-lime-500">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-extrabold text-slate-600 mb-1">Họ và Tên Thành Viên *</label>
                     <input type="text" id="regName" required placeholder="Nguyễn Văn A" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:border-lime-500">
                 </div>
+
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-600 mb-1">SĐT / Zalo *</label>
@@ -482,18 +554,15 @@
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-extrabold text-slate-600 mb-1">Link Ảnh Đại Diện (Không bắt buộc)</label>
-                    <input type="url" id="regAvatar" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs font-medium text-slate-900 focus:outline-none focus:border-lime-500">
-                </div>
+
                 <button type="submit" class="w-full bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-xl text-sm transition shadow-md shadow-lime-500/20">
-                    Tạo Tài Khoản
+                    Tạo Tài Khoản & Tham Gia CLB
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- 4. ADD/EDIT MEMBER MODAL -->
+    <!-- 5. ADD/EDIT MEMBER MODAL (ADMIN / PROFILE EDIT) -->
     <div id="memberModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeMemberModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -502,13 +571,15 @@
             <form onsubmit="saveMember(event)" class="space-y-4">
                 <input type="hidden" id="memberId">
                 <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                    <div class="w-16 h-16 rounded-full bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm">
                         <img id="avatarPreview" src="https://placehold.co/200x200/f1f5f9/65a30d?text=Avatar" class="w-full h-full object-cover">
                     </div>
-                    <div class="flex-1">
-                        <label class="block text-xs font-extrabold text-slate-600 mb-1">Ảnh Đại Diện (URL hoặc Tải lên)</label>
-                        <input type="text" id="memberAvatarUrl" oninput="updateAvatarPreview(this.value)" placeholder="https://link-anh.jpg" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none mb-1 font-medium">
-                        <input type="file" id="memberAvatarFile" accept="image/*" onchange="handleFileUpload(event)" class="text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-slate-200 file:text-slate-800">
+                    <div class="flex-1 space-y-1.5">
+                        <label class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-crop-simple"></i> Chọn & Cắt Ảnh mới
+                            <input type="file" id="memberAvatarFile" accept="image/*" onchange="handleMemberFileSelect(event)" class="hidden">
+                        </label>
+                        <input type="text" id="memberAvatarUrl" oninput="updateAvatarPreview(this.value)" placeholder="Hoặc dán URL đường dẫn ảnh..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none font-medium">
                     </div>
                 </div>
 
@@ -554,7 +625,7 @@
         </div>
     </div>
 
-    <!-- 5. SCORE & COURT INPUT MODAL FOR BRACKET -->
+    <!-- 6. SCORE & COURT INPUT MODAL FOR BRACKET -->
     <div id="scoreModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
             <button onclick="closeScoreModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -622,6 +693,10 @@
         let isAuthReady = false;
         let clubLogoUrl = "";
         let tempLogoDataUrl = "";
+
+        // Cropper Global Instances
+        let cropperInstance = null;
+        let activeCropTarget = 'reg'; // 'reg' or 'member'
 
         let membersData = [
             { id: "1", name: "Nguyễn Văn Hùng", rating: 4.2, gender: "Nam", phone: "0905123456", password: "123", role: "Ban Quản Lý", hand: "Tay Phải", position: "Bên Trái (Left)", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
@@ -745,6 +820,109 @@
                 logoContent.innerHTML = `<img src="${clubLogoUrl}" alt="Ecohome Pickleball Logo" class="w-full h-full object-cover">`;
             } else {
                 logoContent.innerHTML = `<i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl animate-pulse"></i>`;
+            }
+        }
+
+        /* ================= CROPPER FUNCTIONS ================= */
+        function handleRegFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (file) {
+                openCropperModal(file, 'reg');
+                e.target.value = '';
+            }
+        }
+
+        function handleMemberFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (file) {
+                openCropperModal(file, 'member');
+                e.target.value = '';
+            }
+        }
+
+        function openCropperModal(file, target) {
+            if (!file) return;
+            activeCropTarget = target;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const cropperImg = document.getElementById('cropperImg');
+                cropperImg.src = evt.target.result;
+
+                document.getElementById('cropModal').classList.remove('hidden');
+
+                if (cropperInstance) {
+                    cropperInstance.destroy();
+                }
+
+                // Initialize Cropper.js instance with 1:1 square ratio
+                cropperInstance = new Cropper(cropperImg, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.85,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function closeCropperModal() {
+            document.getElementById('cropModal').classList.add('hidden');
+            if (cropperInstance) {
+                cropperInstance.destroy();
+                cropperInstance = null;
+            }
+        }
+
+        function rotateCropper(degree) {
+            if (cropperInstance) cropperInstance.rotate(degree);
+        }
+
+        function zoomCropper(ratio) {
+            if (cropperInstance) cropperInstance.zoom(ratio);
+        }
+
+        function resetCropper() {
+            if (cropperInstance) cropperInstance.reset();
+        }
+
+        function applyCrop() {
+            if (!cropperInstance) return;
+
+            const canvas = cropperInstance.getCroppedCanvas({
+                width: 300,
+                height: 300,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            if (!canvas) return;
+
+            const croppedBase64 = canvas.toDataURL('image/jpeg', 0.88);
+
+            if (activeCropTarget === 'reg') {
+                document.getElementById('regAvatar').value = croppedBase64;
+                document.getElementById('regAvatarPreview').src = croppedBase64;
+            } else if (activeCropTarget === 'member') {
+                document.getElementById('memberAvatarUrl').value = croppedBase64;
+                document.getElementById('avatarPreview').src = croppedBase64;
+            }
+
+            closeCropperModal();
+            showToast("Đã cắt ảnh đại diện thành công!");
+        }
+
+        function updateRegAvatarFromUrl(url) {
+            const preview = document.getElementById('regAvatarPreview');
+            if (preview && url) {
+                preview.src = url;
             }
         }
 
@@ -895,6 +1073,10 @@
                 const adminModal = document.getElementById('adminModal');
                 if (adminModal && !adminModal.classList.contains('pointer-events-none')) {
                     toggleModalAnimation('adminModal', false);
+                }
+                const cropModal = document.getElementById('cropModal');
+                if (cropModal && !cropModal.classList.contains('hidden')) {
+                    closeCropperModal();
                 }
                 const logoModal = document.getElementById('logoModal');
                 if (logoModal && !logoModal.classList.contains('hidden')) {
@@ -1248,18 +1430,6 @@
 
         function updateAvatarPreview(url) {
             if(url) document.getElementById('avatarPreview').src = url;
-        }
-
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    document.getElementById('avatarPreview').src = evt.target.result;
-                    document.getElementById('memberAvatarUrl').value = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
         }
 
         async function saveMember(e) {
@@ -1646,7 +1816,6 @@
         window.openMemberModal = openMemberModal;
         window.closeMemberModal = closeMemberModal;
         window.updateAvatarPreview = updateAvatarPreview;
-        window.handleFileUpload = handleFileUpload;
         window.saveMember = saveMember;
         window.editMember = editMember;
         window.deleteMember = deleteMember;
@@ -1658,6 +1827,17 @@
         window.closeScoreModal = closeScoreModal;
         window.saveMatchScore = saveMatchScore;
         window.generateNewBracketModal = generateNewBracketModal;
+
+        // Image Cropper Bindings
+        window.handleRegFileSelect = handleRegFileSelect;
+        window.handleMemberFileSelect = handleMemberFileSelect;
+        window.openCropperModal = openCropperModal;
+        window.closeCropperModal = closeCropperModal;
+        window.rotateCropper = rotateCropper;
+        window.zoomCropper = zoomCropper;
+        window.resetCropper = resetCropper;
+        window.applyCrop = applyCrop;
+        window.updateRegAvatarFromUrl = updateRegAvatarFromUrl;
     </script>
 </body>
 </html>
