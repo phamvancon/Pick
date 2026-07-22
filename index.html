@@ -67,6 +67,16 @@
             box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.25);
         }
 
+        .ai-pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(132, 204, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0); }
+        }
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 6px; }
@@ -96,8 +106,13 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs & Auth -->
+                <!-- Navigation Tabs & Auth & AI Voice Welcome -->
                 <div class="flex items-center gap-2 sm:gap-3">
+                    <button onclick="triggerWelcomeSpeech()" title="Phát lời chào Viettel AI" class="bg-gradient-to-r from-red-600 via-red-500 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-extrabold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md border border-red-400 ai-pulse-glow transition active:scale-95">
+                        <i class="fa-solid fa-volume-high text-white text-sm animate-bounce"></i>
+                        <span class="hidden md:inline">Giọng Nói AI Viettel</span>
+                    </button>
+
                     <nav class="hidden md:flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80">
                         <button onclick="switchTab('members')" id="tab-members" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">
                             <i class="fa-solid fa-users mr-1.5 text-lime-600"></i>Thành Viên
@@ -141,6 +156,22 @@
         </div>
     </header>
 
+    <div id="aiVoiceControlBar" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-slate-900/95 backdrop-blur-md text-white p-3.5 rounded-2xl shadow-2xl border border-red-500/40 flex items-center gap-3 hidden max-w-md">
+        <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white flex-shrink-0 animate-pulse">
+            <i class="fa-solid fa-waveform-lines text-lg"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] bg-red-500 text-white font-black px-2 py-0.5 rounded-md uppercase">Viettel AI Voice</span>
+                <span id="aiVoiceStatusText" class="text-[10px] text-lime-400 font-bold">Đang phát...</span>
+            </div>
+            <p id="aiVoiceSpeakingText" class="text-xs font-medium text-slate-200 truncate mt-0.5">...</p>
+        </div>
+        <button onclick="stopSpeech()" class="w-8 h-8 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white rounded-xl flex items-center justify-center transition" title="Dừng đọc">
+            <i class="fa-solid fa-stop text-xs"></i>
+        </button>
+    </div>
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         <!-- Toast Notification Container -->
         <div id="toastContainer" class="fixed top-24 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -177,7 +208,7 @@
                     <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
                         Danh Sách Thành Viên <span id="memberCountBadge" class="text-xs bg-lime-100 text-lime-800 px-3 py-1 rounded-full font-extrabold border border-lime-300">0</span>
                     </h2>
-                    <p class="text-sm text-slate-500 font-medium mt-1">Hồ sơ chỉ số DUPR, vị trí thi đấu, tay thuận & thông tin liên hệ thành viên CLB</p>
+                    <p class="text-sm text-slate-500 font-medium mt-1">💡 Nhấn vào thẻ bất kỳ để **Viettel AI đọc tiểu sử** và thông số VĐV!</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="relative flex-1 sm:w-64">
@@ -783,10 +814,12 @@
         import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const ADMIN_PASSWORD_HASH = "215151365";
+        const VIETTEL_AI_TOKEN = "395f6b744a34ff3eb6e042656cde6ffe";
 
         let app, db, auth;
         let isAuthReady = false;
         let membersColRef, bracketDocRef, configDocRef, socialDocRef, newsColRef;
+        let currentAudioPlayer = null;
 
         let membersData = [
             { id: "101", name: "Trần Minh Hoàng", phone: "0905111222", rating: 4.2, gender: "Nam", hand: "Tay Phải", position: "Cả Hai Bên", role: "Ban Quản Lý", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Hoang" },
@@ -801,7 +834,7 @@
 
         let tournamentBracket = {
             playerCount: 8,
-            bracketType: "doubles", // "singles" or "doubles"
+            bracketType: "doubles",
             hideDetails: false,
             rounds: [
                 {
@@ -828,6 +861,111 @@
         let currentLoggedUser = null;
         let newsData = [];
         let currentSocialDraw = null;
+
+        /* =========================================================
+           VIETTEL AI VOICE TEXT-TO-SPEECH (TTS) INTEGRATION
+           ========================================================= */
+        async function speakText(text) {
+            if (!text) return;
+
+            stopSpeech();
+
+            showToast(`🔊 Viettel AI đang đọc...`, "info");
+            updateTTSStatusUI(true, text);
+
+            try {
+                const response = await fetch('https://viettelai.vn/tts/speech_synthesis', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': '*/*',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        voice: "hn-quynhanh",
+                        speed: 1,
+                        tts_return_option: 3,
+                        token: VIETTEL_AI_TOKEN,
+                        without_filter: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Viettel AI response status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                if (blob && blob.size > 0) {
+                    const audioUrl = URL.createObjectURL(blob);
+                    currentAudioPlayer = new Audio(audioUrl);
+                    currentAudioPlayer.onended = () => updateTTSStatusUI(false);
+                    currentAudioPlayer.onerror = () => fallbackWebSpeech(text);
+                    await currentAudioPlayer.play();
+                } else {
+                    fallbackWebSpeech(text);
+                }
+            } catch (err) {
+                console.warn("Viettel AI TTS API connection note, utilizing Web Speech API fallback:", err);
+                fallbackWebSpeech(text);
+            }
+        }
+
+        function fallbackWebSpeech(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 0.95;
+
+                const voices = window.speechSynthesis.getVoices();
+                const viVoice = voices.find(v => v.lang.includes('vi') || v.lang.includes('VI'));
+                if (viVoice) utterance.voice = viVoice;
+
+                utterance.onend = () => updateTTSStatusUI(false);
+                utterance.onerror = () => updateTTSStatusUI(false);
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                updateTTSStatusUI(false);
+            }
+        }
+
+        function stopSpeech() {
+            if (currentAudioPlayer) {
+                currentAudioPlayer.pause();
+                currentAudioPlayer = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            updateTTSStatusUI(false);
+        }
+
+        function updateTTSStatusUI(isSpeaking, text = "") {
+            const bar = document.getElementById('aiVoiceControlBar');
+            const speakingText = document.getElementById('aiVoiceSpeakingText');
+            if (!bar) return;
+
+            if (isSpeaking) {
+                bar.classList.remove('hidden');
+                if (speakingText) speakingText.innerText = text;
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+
+        function triggerWelcomeSpeech() {
+            const welcomeText = "Xin chào mừng tất cả các thành viên đến với Câu lạc bộ Pickleball Ecohome Nhơn Bình! Chúc các bạn có những giờ phút thi đấu thể thao hết mình, giao lưu vui vẻ và dồi dào sức khỏe!";
+            speakText(welcomeText);
+        }
+
+        function speakMemberBio(memberId) {
+            const m = membersData.find(item => item.id.toString() === memberId.toString());
+            if (!m) return;
+
+            const bioText = `Thành viên ${m.name}. Chỉ số D U P R ${parseFloat(m.rating || 0).toFixed(2)}. Giới tính ${m.gender || 'Nam'}. Tay thuận ${m.hand || 'Tay Phải'}. Vị trí sở trường ${m.position || 'Cả hai bên'}. Chức vụ ${m.role || 'Thành viên'}.`;
+            speakText(bioText);
+        }
 
         function customConfirm(title, message, onOk) {
             const modal = document.getElementById('confirmModal');
@@ -883,14 +1021,13 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    // Ultra HD 600x800 px for crisp high-DPI display
                     canvas.width = 600;
                     canvas.height = 800;
                     const ctx = canvas.getContext('2d');
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
 
-                    const targetRatio = 600 / 800; // 0.75
+                    const targetRatio = 600 / 800;
                     const imgRatio = img.width / img.height;
                     let drawW, drawH, startX, startY;
 
@@ -955,7 +1092,6 @@
                 socialDocRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'social', 'current');
                 newsColRef = collection(db, 'artifacts', targetAppId, 'public', 'data', 'news');
 
-                // Real-time synchronization for club members
                 onSnapshot(membersColRef, (snapshot) => {
                     if (!snapshot.empty) {
                         const cloudMembers = [];
@@ -972,7 +1108,6 @@
                     }
                 }, (err) => console.error("Firestore Members error:", err));
 
-                // Real-time synchronization for tournament bracket
                 onSnapshot(bracketDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         tournamentBracket = docSnap.data();
@@ -982,7 +1117,6 @@
                     }
                 }, (err) => console.error("Firestore Bracket error:", err));
 
-                // Real-time synchronization for club config (Logo)
                 onSnapshot(configDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const conf = docSnap.data();
@@ -1023,6 +1157,11 @@
             renderMembers();
             renderBracket();
             updateAdminUI();
+
+            // Trigger Welcome Speech automatically on entrance
+            setTimeout(() => {
+                triggerWelcomeSpeech();
+            }, 1000);
         }
 
         function renderHeaderLogo() {
@@ -1061,8 +1200,13 @@
                 const card = document.createElement('div');
                 const isMe = currentLoggedUser && currentLoggedUser.id.toString() === m.id.toString();
 
-                card.className = `bg-white border ${isMe ? 'border-lime-500 ring-2 ring-lime-500/30 shadow-lg' : 'border-slate-200/90'} rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300 group relative overflow-hidden`;
+                card.className = `bg-white border ${isMe ? 'border-lime-500 ring-2 ring-lime-500/30 shadow-lg' : 'border-slate-200/90'} rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300 group relative overflow-hidden cursor-pointer`;
                 
+                card.onclick = (e) => {
+                    if (e.target.closest('.admin-action-btn')) return;
+                    speakMemberBio(m.id);
+                };
+
                 const roleBadgeStyle = m.role === 'Ban Quản Lý' ? 'bg-amber-100 text-amber-900 border-amber-300' : (m.role === 'Huấn Luận Viên' ? 'bg-sky-100 text-sky-900 border-sky-300' : 'bg-slate-100 text-slate-700 border-slate-200');
 
                 card.innerHTML = `
@@ -1075,7 +1219,9 @@
                                 </span>
                                 ${isMe ? `<span class="bg-lime-500 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm"><i class="fa-solid fa-user-check mr-1"></i>Hồ sơ của bạn</span>` : ''}
                             </div>
-                            <span class="text-[10px] font-mono font-extrabold text-slate-400">ID: #${m.id.toString().slice(-4)}</span>
+                            <button onclick="event.stopPropagation(); speakMemberBio('${m.id}')" title="Phát giọng đọc AI Viettel" class="w-8 h-8 rounded-full bg-red-100 hover:bg-red-500 text-red-600 hover:text-white flex items-center justify-center text-xs transition shadow-xs">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
                         </div>
 
                         <!-- Main Info Block with Crisp 3:4 Avatar -->
@@ -1123,15 +1269,15 @@
 
                     <!-- Footer & Action Buttons -->
                     <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <span class="text-[10px] font-extrabold text-slate-400 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-check text-lime-500"></i> Ecohome Nhơn Bình Member
+                        <span class="text-[10px] font-extrabold text-red-600 flex items-center gap-1">
+                            <i class="fa-solid fa-volume-high text-xs animate-pulse"></i> Nhấn để nghe Viettel AI đọc
                         </span>
                         ${(isAdminLoggedIn || isMe) ? `
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="editMember('${m.id}')" class="text-xs font-black text-slate-800 hover:text-lime-700 bg-slate-100 hover:bg-lime-100 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-lime-300 transition flex items-center gap-1 shadow-xs">
+                        <div class="flex items-center gap-1.5 admin-action-btn">
+                            <button onclick="event.stopPropagation(); editMember('${m.id}')" class="text-xs font-black text-slate-800 hover:text-lime-700 bg-slate-100 hover:bg-lime-100 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-lime-300 transition flex items-center gap-1 shadow-xs">
                                 <i class="fa-solid fa-pen-to-square"></i> ${isMe ? 'Sửa hồ sơ' : 'Sửa'}
                             </button>
-                            ${isAdminLoggedIn ? `<button onclick="deleteMember('${m.id}')" class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl border border-red-200 transition shadow-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            ${isAdminLoggedIn ? `<button onclick="event.stopPropagation(); deleteMember('${m.id}')" class="text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl border border-red-200 transition shadow-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
                         </div>
                         ` : ''}
                     </div>
@@ -1500,11 +1646,9 @@
                         pool = pool.slice(shift).concat(pool.slice(0, shift));
                     }
                 } else {
-                    // Trộn cặp ngẫu nhiên hoàn toàn cho từng ván (doubles_random & singles)
                     pool.sort(() => Math.random() - 0.5);
                 }
 
-                // Compute round schedule times
                 const roundStartMinTotal = (startHour * 60) + startMin + ((r - 1) * durationMins);
                 const roundEndMinTotal = roundStartMinTotal + durationMins;
 
@@ -1539,7 +1683,6 @@
                         teamB = [matchPlayers[1], matchPlayers[2] || matchPlayers[3]];
                     }
 
-                    // Auto DUPR Handicap Calculation
                     let handicapInfo = null;
                     if (enableHandicap) {
                         const avgA = teamA.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / teamA.length;
@@ -1835,7 +1978,6 @@
                 match.winner = null;
             }
 
-            // Automatically advance winner to next round match
             if (roundIdx + 1 < tournamentBracket.rounds.length) {
                 const nextRound = tournamentBracket.rounds[roundIdx + 1];
                 const nextMatchIdx = Math.floor(matchIdx / 2);
@@ -1848,7 +1990,6 @@
                     }
                 }
             } else if (roundIdx === tournamentBracket.rounds.length - 1) {
-                // Set Champion for final match
                 tournamentBracket.champion = match.winner || null;
             }
 
@@ -1876,11 +2017,9 @@
             const hideDetails = tournamentBracket.hideDetails || false;
             const orientation = tournamentBracket.orientation || 'vertical';
 
-            // Sync orientation dropdown in admin panel if present
             const orientSelect = document.getElementById('bracketOrientation');
             if (orientSelect) orientSelect.value = orientation;
 
-            // Update status badge if available
             const statusBadge = document.getElementById('bracketStatusBadge');
             if (statusBadge) {
                 statusBadge.innerText = isDoubles ? "Thể Thức Đánh Đôi (2vs2)" : "Thể Thức Đánh Đơn (1vs1)";
@@ -1891,9 +2030,6 @@
 
             const rounds = tournamentBracket.rounds || [];
 
-            /* =========================================================
-               LAYOUT MODE 1: VERTICAL (TOP-TO-BOTTOM) - FULL NAME DISPLAY
-               ========================================================= */
             if (orientation === 'vertical') {
                 container.className = "flex flex-col gap-8 py-2 w-full";
 
@@ -1901,7 +2037,6 @@
                     const roundSection = document.createElement('div');
                     roundSection.className = "space-y-4 w-full";
 
-                    // Round Header
                     const roundHeader = document.createElement('div');
                     roundHeader.className = "flex items-center gap-3 justify-center";
                     roundHeader.innerHTML = `
@@ -1914,7 +2049,6 @@
                     `;
                     roundSection.appendChild(roundHeader);
 
-                    // Responsive Grid according to match count in this round
                     const matchCount = roundObj.matches?.length || 1;
                     let gridColsClass = "grid-cols-1";
                     if (matchCount === 2) gridColsClass = "grid-cols-1 md:grid-cols-2";
@@ -1967,7 +2101,6 @@
                     roundSection.appendChild(matchesGrid);
                     container.appendChild(roundSection);
 
-                    // Downward Connecting Arrow between rounds
                     if (roundIdx < rounds.length - 1) {
                         const arrowDiv = document.createElement('div');
                         arrowDiv.className = "flex justify-center my-1";
@@ -1980,14 +2113,13 @@
                     }
                 });
 
-                // Top-to-Bottom Grand Champion Banner
                 const champDiv = document.createElement('div');
                 champDiv.className = "pt-4 flex justify-center w-full";
                 champDiv.innerHTML = `
                     <div class="text-center p-6 bg-gradient-to-b from-amber-100 via-amber-50 to-white border-2 border-amber-400 rounded-3xl w-full max-w-xl shadow-lg relative overflow-hidden">
                         <div class="absolute -top-6 -right-6 text-amber-200/40 text-8xl pointer-events-none"><i class="fa-solid fa-trophy"></i></div>
                         <i class="fa-solid fa-trophy text-5xl text-amber-500 mb-2 animate-bounce"></i>
-                        <h4 class="text-xs font-black text-amber-900 uppercase tracking-widest mb-1.5">NHÀ VO DỊCH QUÁN QUÂN (${isDoubles ? 'CẶP ĐÔI' : 'ĐƠN'})</h4>
+                        <h4 class="text-xs font-black text-amber-900 uppercase tracking-widest mb-1.5">NHÀ VÔ ĐỊCH QUÁN QUÂN (${isDoubles ? 'CẶP ĐÔI' : 'ĐƠN'})</h4>
                         <p class="text-lg sm:text-2xl font-black text-slate-900 whitespace-normal break-words leading-snug px-2" title="${tournamentBracket.champion || 'Chưa xác định'}">
                             ${tournamentBracket.champion || 'Chưa xác định'}
                         </p>
@@ -1995,9 +2127,6 @@
                 `;
                 container.appendChild(champDiv);
 
-            /* =========================================================
-               LAYOUT MODE 2: HORIZONTAL (LEFT-TO-RIGHT)
-               ========================================================= */
             } else {
                 container.className = "flex items-center min-w-[850px] justify-between gap-8 py-4 overflow-x-auto";
 
@@ -2124,14 +2253,12 @@
                 return;
             }
 
-            // Form teams/pairs if format is doubles
             let contestants = [];
 
             if (formatType === 'doubles') {
                 let pool = [...selectedPlayers];
 
                 if (pairingMethod === 'balanced') {
-                    // Sort by DUPR rating descending
                     pool.sort((a,b) => (parseFloat(b.rating)||0) - (parseFloat(a.rating)||0));
                     while (pool.length >= 2) {
                         const top = pool.shift();
@@ -2150,7 +2277,7 @@
                             contestants.push({ name: `${pool[i].name} & ( Ghép Lẻ )` });
                         }
                     }
-                } else { // Sequential
+                } else {
                     for (let i = 0; i < pool.length; i += 2) {
                         if (i + 1 < pool.length) {
                             contestants.push({ name: `${pool[i].name} & ${pool[i+1].name}` });
@@ -2160,12 +2287,10 @@
                     }
                 }
             } else {
-                // Singles format
                 contestants = selectedPlayers.map(p => ({ name: p.name }));
             }
 
             const totalCount = contestants.length;
-            // Determine bracket size (2, 4, 8, 16, or 32)
             let bracketSize = 4;
             if (totalCount > 16) bracketSize = 32;
             else if (totalCount > 8) bracketSize = 16;
@@ -2177,7 +2302,6 @@
             customConfirm("Tạo Sơ Đồ Thi Đấu Mới", `Tạo sơ đồ ${formatTitle} quy mô ${bracketSize} đội (${totalCount} suất thi đấu được chọn, tự động chèn nhánh BYE đặc cách nếu lẻ)?`, async () => {
                 let pool = [...contestants].sort(() => Math.random() - 0.5);
                 
-                // Pad remaining slots with "BYE (Đặc cách)"
                 while(pool.length < bracketSize) {
                     pool.push({ name: 'BYE (Đặc cách)' });
                 }
@@ -2190,7 +2314,6 @@
 
                 const newRounds = [];
 
-                // Round 1
                 const firstRoundMatches = [];
                 for (let i = 0; i < bracketSize / 2; i++) {
                     const p1 = pool[i * 2]?.name || '---';
@@ -2225,7 +2348,6 @@
                     matches: firstRoundMatches
                 });
 
-                // Subsequent rounds
                 for (let r = 1; r < totalRounds; r++) {
                     const matchCount = bracketSize / Math.pow(2, r + 1);
                     const prevRound = newRounds[r - 1];
@@ -2387,7 +2509,6 @@
             const noticeBanner = document.getElementById('adminOnlyNoticeBanner');
             const addNewsBtn = document.getElementById('addNewsBtn');
 
-            // Inputs in social tab
             const socialInputs = ['socialCourtCount', 'socialMatchType', 'socialRoundCount', 'socialCourtPrefix'];
 
             if (isAdminLoggedIn) {
@@ -2559,7 +2680,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // Limit width to prevent firestore size issues
+                    const MAX_WIDTH = 800;
                     let width = img.width;
                     let height = img.height;
 
@@ -2573,7 +2694,6 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Compress to JPG
                     const base64 = canvas.toDataURL('image/jpeg', 0.8);
                     
                     document.getElementById('newsImageBase64').value = base64;
@@ -2742,6 +2862,10 @@
         window.clearSocialDrawData = clearSocialDrawData;
         window.copySocialDrawToClipboard = copySocialDrawToClipboard;
         window.changeBracketOrientation = changeBracketOrientation;
+        window.speakText = speakText;
+        window.stopSpeech = stopSpeech;
+        window.triggerWelcomeSpeech = triggerWelcomeSpeech;
+        window.speakMemberBio = speakMemberBio;
 
         window.addEventListener('load', () => {
             initFirebase();
