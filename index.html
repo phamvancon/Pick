@@ -103,10 +103,10 @@
                             <i class="fa-solid fa-users mr-1.5 text-lime-600"></i>Thành Viên
                         </button>
                         <button onclick="switchTab('social')" id="tab-social" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">
-                            <i class="fa-solid fa-shuffle mr-1.5 text-sky-600"></i>Bốc Thăm Sân Đấu
+                            <i class="fa-solid fa-shuffle mr-1.5 text-sky-600"></i>Bốc Thăm Sân
                         </button>
                         <button onclick="switchTab('bracket')" id="tab-bracket" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">
-                            <i class="fa-solid fa-sitemap mr-1.5 text-amber-500"></i>Sơ Đồ Giải Đấu
+                            <i class="fa-solid fa-sitemap mr-1.5 text-amber-500"></i>Sơ Đồ Giải
                         </button>
                     </nav>
 
@@ -134,9 +134,9 @@
             
             <!-- Mobile Navigation -->
             <div class="flex md:hidden border-t border-slate-200 py-2 justify-around text-xs font-bold">
-                <button onclick="switchTab('members')" id="mtab-members" class="py-2 px-3 rounded-xl text-lime-700 bg-lime-100">Thành Viên</button>
-                <button onclick="switchTab('social')" id="mtab-social" class="py-2 px-3 rounded-xl text-slate-600">Bốc Thăm Sân</button>
-                <button onclick="switchTab('bracket')" id="mtab-bracket" class="py-2 px-3 rounded-xl text-slate-600">Sơ Đồ Giải</button>
+                <button onclick="switchTab('members')" id="mtab-members" class="py-2 px-2 rounded-xl text-lime-700 bg-lime-100">Thành Viên</button>
+                <button onclick="switchTab('social')" id="mtab-social" class="py-2 px-2 rounded-xl text-slate-600">Bốc Thăm</button>
+                <button onclick="switchTab('bracket')" id="mtab-bracket" class="py-2 px-2 rounded-xl text-slate-600">Sơ Đồ</button>
             </div>
         </div>
     </header>
@@ -147,6 +147,31 @@
 
         <!-- ================= TAB 1: MEMBERS MANAGEMENT ================= -->
         <section id="members-section" class="space-y-6">
+            <!-- NEWSFEED INTEGRATED INTO MEMBERS TAB (MOVED TO TOP) -->
+            <div class="mb-10 pb-8 border-b-2 border-slate-200 border-dashed">
+                <div class="bg-gradient-to-r from-purple-50 to-white p-6 rounded-3xl border border-purple-100 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
+                            <i class="fa-solid fa-bullhorn text-purple-600"></i> Bảng Tin & Thông Báo CLB
+                        </h2>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Cập nhật tin tức nội bộ, thông báo giải đấu và vinh danh nhà vô địch</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button id="addNewsBtn" onclick="openNewsModal()" class="hidden bg-purple-600 hover:bg-purple-500 text-white font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-purple-600/20 transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Đăng Bài Mới
+                        </button>
+                    </div>
+                </div>
+
+                <div id="newsFeedContainer" class="space-y-6 max-w-4xl mx-auto">
+                    <!-- Dynamic News Cards -->
+                    <div class="text-center py-16 text-slate-400">
+                        <i class="fa-solid fa-newspaper text-5xl mb-3 text-slate-200"></i>
+                        <p class="font-bold text-slate-500">Chưa có bài đăng nào.</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm">
                 <div>
                     <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
@@ -287,11 +312,11 @@
                     <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
                         <i class="fa-solid fa-trophy text-amber-500"></i> Sơ Đồ Thi Đấu Giải Nội Bộ
                     </h2>
-                    <p class="text-sm text-slate-500 font-medium mt-1">Cây Knockout trực quan chuyên nghiệp, cập nhật vị trí sân và tỷ số trực tiếp</p>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Lấy dữ liệu 8 người chơi đang được chọn ở tab Bốc Thăm để tạo nhánh đấu.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <button id="setupBracketBtn" onclick="generateNewBracketModal()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-amber-500/20 transition flex items-center gap-2">
-                        <i class="fa-solid fa-diagram-project"></i> Tạo Sơ Đồ Giải Mới
+                        <i class="fa-solid fa-diagram-project"></i> Tạo Giải Từ Danh Sách Đã Chọn
                     </button>
                 </div>
             </div>
@@ -607,6 +632,49 @@
         </div>
     </div>
 
+    <!-- NEWS POST MODAL -->
+    <div id="newsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeNewsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-black text-slate-900 mb-4 flex items-center gap-2"><i class="fa-solid fa-pen-nib text-purple-600"></i> Đăng Bài Viết Mới</h3>
+
+            <form onsubmit="saveNewsPost(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 mb-1">Tiêu Đề Bài Viết *</label>
+                    <input type="text" id="newsTitle" required placeholder="Vinh danh nhà vô địch..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-purple-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold text-slate-600 mb-1">Nội Dung</label>
+                    <textarea id="newsContent" rows="4" placeholder="Nhập nội dung bài viết..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-900 focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <label class="block text-xs font-extrabold text-slate-600 mb-2">Đính Kèm Hình Ảnh (Banner / Nhà Vô Địch)</label>
+                    
+                    <div id="newsImgPreviewContainer" class="hidden mb-3 w-full h-48 rounded-xl overflow-hidden border border-slate-300 relative">
+                        <img id="newsImgPreview" src="" class="w-full h-full object-cover">
+                        <button type="button" onclick="clearNewsImage()" class="absolute top-2 right-2 bg-slate-900/70 hover:bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition"><i class="fa-solid fa-trash text-xs"></i></button>
+                    </div>
+
+                    <label class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm mb-2 border border-purple-200">
+                        <i class="fa-solid fa-image"></i> Chọn Ảnh Từ Máy Thiết Bị
+                        <input type="file" accept="image/*" onchange="processNewsImage(event.target.files[0])" class="hidden">
+                    </label>
+                    <p class="text-[10px] text-slate-500 font-medium mb-2">Hệ thống sẽ tự động nén kích thước để tối ưu tốc độ tải trang.</p>
+                    <input type="hidden" id="newsImageBase64">
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-slate-200">
+                    <button type="button" onclick="closeNewsModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm transition">Hủy bỏ</button>
+                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-black py-2.5 rounded-xl text-sm transition shadow-md shadow-purple-500/20">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Đăng Bài
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -616,7 +684,7 @@
 
         let app, db, auth;
         let isAuthReady = false;
-        let membersColRef, bracketDocRef, configDocRef;
+        let membersColRef, bracketDocRef, configDocRef, socialDocRef, newsColRef;
 
         let membersData = [
             { id: "101", name: "Trần Minh Hoàng", phone: "0905111222", rating: 4.2, gender: "Nam", hand: "Tay Phải", position: "Cả Hai Bên", role: "Ban Quản Lý", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Hoang" },
@@ -662,6 +730,8 @@
         let tempLogoDataUrl = "";
         let isAdminLoggedIn = false;
         let currentLoggedUser = null;
+        let newsData = [];
+        let currentSocialDraw = null;
 
         function customConfirm(title, message, onOk) {
             const modal = document.getElementById('confirmModal');
@@ -786,6 +856,8 @@
                 membersColRef = collection(db, 'artifacts', targetAppId, 'public', 'data', 'members');
                 bracketDocRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'bracket', 'current');
                 configDocRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'config', 'general');
+                socialDocRef = doc(db, 'artifacts', targetAppId, 'public', 'data', 'social', 'current');
+                newsColRef = collection(db, 'artifacts', targetAppId, 'public', 'data', 'news');
 
                 // Real-time synchronization for club members
                 onSnapshot(membersColRef, (snapshot) => {
@@ -824,6 +896,20 @@
                         }
                     }
                 }, (err) => console.error("Firestore Config error:", err));
+
+                onSnapshot(socialDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        currentSocialDraw = docSnap.data();
+                        renderSocialMatchResults();
+                    }
+                });
+
+                onSnapshot(newsColRef, (snapshot) => {
+                    newsData = [];
+                    snapshot.forEach(doc => newsData.push(doc.data()));
+                    newsData.sort((a, b) => b.timestamp - a.timestamp);
+                    renderNewsFeed();
+                });
 
             } catch (err) {
                 console.warn("Firebase initialization warning:", err);
@@ -1228,7 +1314,7 @@
             updateSocialSelectedCount();
         }
 
-        function generateRandomSocialMatches() {
+        async function generateRandomSocialMatches() {
             if (!isAdminLoggedIn) {
                 showToast("Chỉ Admin mới có quyền thực hiện bốc thăm ghép sân!", "error");
                 return;
@@ -1250,23 +1336,15 @@
             const roundCount = parseInt(document.getElementById('socialRoundCount').value) || 1;
             const courtPrefix = document.getElementById('socialCourtPrefix').value.trim() || "Sân Ecohome";
 
-            const resultsContainer = document.getElementById('socialMatchResults');
-            resultsContainer.innerHTML = '';
+            const newDrawData = {
+                timestamp: Date.now(),
+                courtPrefix: courtPrefix,
+                matchType: matchType,
+                selectedCount: selectedPlayers.length,
+                rounds: []
+            };
 
             for (let r = 1; r <= roundCount; r++) {
-                const roundBox = document.createElement('div');
-                roundBox.className = "bg-white border border-slate-200/90 p-6 rounded-3xl space-y-4 shadow-sm";
-                
-                let roundHeader = `
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-                            <span class="bg-lime-500 text-slate-950 text-xs px-3 py-1 rounded-xl font-black shadow-sm">VÁN ${r}</span> 
-                            <span>Phân Bổ Sân Thi Đấu Giao Lưu</span>
-                        </h3>
-                        <span class="text-xs font-bold text-slate-500">${selectedPlayers.length} VĐV tham gia</span>
-                    </div>
-                `;
-
                 let pool = [...selectedPlayers].sort(() => Math.random() - 0.5);
 
                 if (matchType === 'doubles_mixed') {
@@ -1278,11 +1356,14 @@
                         pool.push(males[i], females[i]);
                     }
                 } else if (matchType === 'doubles_balanced') {
-                    pool.sort((a,b) => (b.rating||0) - (a.rating||0));
+                    pool.sort((a,b) => (parseFloat(b.rating)||0) - (parseFloat(a.rating)||0));
                 }
 
-                let courtGrid = document.createElement('div');
-                courtGrid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+                const roundData = {
+                    roundNum: r,
+                    courts: [],
+                    waiting: []
+                };
 
                 let playerIdx = 0;
                 for (let c = 1; c <= courtCount; c++) {
@@ -1296,29 +1377,96 @@
                         teamA = [matchPlayers[0]];
                         teamB = [matchPlayers[1]];
                     } else {
+                        // Mix a bit for doubles balanced
                         teamA = [matchPlayers[0], matchPlayers[3] || matchPlayers[2]];
                         teamB = [matchPlayers[1], matchPlayers[2] || matchPlayers[3]];
                     }
 
-                    const duprA = (teamA.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / teamA.length).toFixed(1);
-                    const duprB = (teamB.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / teamB.length).toFixed(1);
+                    roundData.courts.push({
+                        courtNum: c,
+                        teamA: teamA,
+                        teamB: teamB
+                    });
+                }
+
+                roundData.waiting = pool.slice(playerIdx);
+                newDrawData.rounds.push(roundData);
+            }
+
+            if (isAuthReady) {
+                try {
+                    await setDoc(socialDocRef, newDrawData);
+                    showToast(`Đã lưu bốc thăm lên hệ thống Cloud!`);
+                } catch(err) {
+                    console.error("Lỗi lưu bốc thăm", err);
+                    showToast("Lỗi lưu bốc thăm", "error");
+                }
+            } else {
+                currentSocialDraw = newDrawData;
+                renderSocialMatchResults();
+                showToast(`Đã bốc thăm ghép cặp thành công!`);
+            }
+        }
+
+        function renderSocialMatchResults() {
+            const resultsContainer = document.getElementById('socialMatchResults');
+            if (!resultsContainer) return;
+
+            if (!currentSocialDraw || !currentSocialDraw.rounds || currentSocialDraw.rounds.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm">
+                        <i class="fa-solid fa-dice-three text-5xl text-slate-300 mb-3"></i>
+                        <p class="text-slate-500 font-bold text-sm">Chưa có lượt bốc thăm nào. Chọn số lượng sân và nhấn nút "Bốc Thăm Ngẫu Nhiên".</p>
+                    </div>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = '';
+            
+            // Add Timestamp header
+            const timeStr = new Date(currentSocialDraw.timestamp).toLocaleString('vi-VN');
+            const headerInfo = document.createElement('div');
+            headerInfo.className = "flex items-center justify-between text-xs text-slate-500 font-bold bg-slate-50 px-4 py-2 rounded-xl border border-slate-200/80 mb-2";
+            headerInfo.innerHTML = `<span><i class="fa-solid fa-cloud text-sky-500 mr-1"></i> Dữ liệu Cloud đồng bộ: ${timeStr}</span><span>${currentSocialDraw.selectedCount} VĐV</span>`;
+            resultsContainer.appendChild(headerInfo);
+
+            currentSocialDraw.rounds.forEach(rData => {
+                const roundBox = document.createElement('div');
+                roundBox.className = "bg-white border border-slate-200/90 p-6 rounded-3xl space-y-4 shadow-sm";
+                
+                let roundHeader = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+                            <span class="bg-lime-500 text-slate-950 text-xs px-3 py-1 rounded-xl font-black shadow-sm">VÁN ${rData.roundNum}</span> 
+                            <span>Phân Bổ Sân Thi Đấu Giao Lưu</span>
+                        </h3>
+                    </div>
+                `;
+
+                let courtGrid = document.createElement('div');
+                courtGrid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+
+                rData.courts.forEach(court => {
+                    const duprA = (court.teamA.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / court.teamA.length).toFixed(1);
+                    const duprB = (court.teamB.reduce((sum, p) => sum + parseFloat(p.rating||0), 0) / court.teamB.length).toFixed(1);
+                    const matchTypeLabel = currentSocialDraw.matchType === 'singles' ? 'Trận Đơn' : 'Trận Đôi';
 
                     const courtCard = document.createElement('div');
                     courtCard.className = "bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-lime-500/80 transition";
                     courtCard.innerHTML = `
                         <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-200">
                             <span class="text-xs font-black text-sky-700 flex items-center gap-1.5 uppercase tracking-wide">
-                                <i class="fa-solid fa-border-all text-lime-600"></i> ${courtPrefix} ${c}
+                                <i class="fa-solid fa-border-all text-lime-600"></i> ${currentSocialDraw.courtPrefix} ${court.courtNum}
                             </span>
                             <span class="text-[10px] font-bold bg-white text-slate-600 px-2 py-0.5 rounded border border-slate-200">
-                                ${matchType === 'singles' ? 'Trận Đơn' : 'Trận Đôi'}
+                                ${matchTypeLabel}
                             </span>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 items-center relative">
                             <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-xs">
                                 <div class="text-[10px] font-black text-slate-400 uppercase mb-1">Đội A (DUPR ${duprA})</div>
-                                ${teamA.map(p => `
+                                ${court.teamA.map(p => `
                                     <div class="font-extrabold text-slate-900 text-xs truncate py-0.5">${p.name} <span class="text-lime-700 text-[10px] font-mono">(${p.rating})</span></div>
                                 `).join('')}
                             </div>
@@ -1327,35 +1475,32 @@
 
                             <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-xs">
                                 <div class="text-[10px] font-black text-slate-400 uppercase mb-1">Đội B (DUPR ${duprB})</div>
-                                ${teamB.map(p => `
+                                ${court.teamB.map(p => `
                                     <div class="font-extrabold text-slate-900 text-xs truncate py-0.5">${p.name} <span class="text-lime-700 text-[10px] font-mono">(${p.rating})</span></div>
                                 `).join('')}
                             </div>
                         </div>
                     `;
                     courtGrid.appendChild(courtCard);
-                }
+                });
 
                 roundBox.innerHTML = roundHeader;
                 roundBox.appendChild(courtGrid);
 
-                const waiting = pool.slice(playerIdx);
-                if (waiting.length > 0) {
+                if (rData.waiting && rData.waiting.length > 0) {
                     const waitingBar = document.createElement('div');
-                    waitingBar.className = "bg-amber-50 border border-amber-200 rounded-2xl p-3 text-xs font-bold text-amber-900 flex flex-wrap items-center gap-2";
+                    waitingBar.className = "bg-amber-50 border border-amber-200 rounded-2xl p-3 text-xs font-bold text-amber-900 flex flex-wrap items-center gap-2 mt-4";
                     waitingBar.innerHTML = `
                         <span class="text-amber-700 font-extrabold flex items-center gap-1">
-                            <i class="fa-solid fa-clock"></i> Chờ lượt ván tiếp (${waiting.length}):
+                            <i class="fa-solid fa-clock"></i> Chờ lượt ván tiếp (${rData.waiting.length}):
                         </span>
-                        ${waiting.map(p => `<span class="bg-white px-2.5 py-1 rounded-xl text-slate-800 border border-amber-200 shadow-xs">${p.name} (${p.rating})</span>`).join('')}
+                        ${rData.waiting.map(p => `<span class="bg-white px-2.5 py-1 rounded-xl text-slate-800 border border-amber-200 shadow-xs">${p.name} (${p.rating})</span>`).join('')}
                     `;
                     roundBox.appendChild(waitingBar);
                 }
 
                 resultsContainer.appendChild(roundBox);
-            }
-
-            showToast(`Đã bốc thăm ghép cặp thành công cho ${courtCount} sân!`);
+            });
         }
 
         function renderBracket() {
@@ -1511,13 +1656,22 @@
                 return;
             }
 
-            if (membersData.length < 4) {
-                showToast("Cần ít nhất 4 thành viên để tạo sơ đồ thi đấu!", "error");
+            const checkboxes = document.querySelectorAll('.social-member-checkbox:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value.toString());
+            let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id.toString()));
+
+            if (selectedPlayers.length < 4) {
+                showToast("Vui lòng sang tab 'Bốc Thăm Sân' chọn ít nhất 4 thành viên để tạo giải!", "error");
                 return;
             }
 
-            customConfirm("Tạo Sơ Đồ Giải Mới", "Bạn có muốn tạo lại Sơ đồ giải đấu mới ngẫu nhiên từ danh sách thành viên hiện tại?", async () => {
-                const shuffled = [...membersData].sort(() => Math.random() - 0.5);
+            customConfirm("Tạo Sơ Đồ Giải Từ Danh Sách Chọn", `Bạn có muốn tạo Sơ đồ thi đấu mới với ${selectedPlayers.length} thành viên đang được CHỌN ở tab Bốc Thăm? (Hệ thống sẽ lấy tối đa 8 người cho vòng Tứ Kết)`, async () => {
+                
+                let pool = [...selectedPlayers].sort(() => Math.random() - 0.5).slice(0, 8);
+                // Pad missing slots with BYE (---)
+                while(pool.length < 8) {
+                    pool.push({ name: '---' });
+                }
                 
                 tournamentBracket = {
                     playerCount: 8,
@@ -1525,10 +1679,10 @@
                         {
                             roundName: "Vòng Tứ Kết",
                             matches: [
-                                { id: 101, court: "Sân Ecohome 1", p1: shuffled[0]?.name || '---', p2: shuffled[1]?.name || '---', score1: null, score2: null, winner: null },
-                                { id: 102, court: "Sân Ecohome 2", p1: shuffled[2]?.name || '---', p2: shuffled[3]?.name || '---', score1: null, score2: null, winner: null },
-                                { id: 103, court: "Sân Ecohome 3", p1: shuffled[4]?.name || '---', p2: shuffled[5]?.name || '---', score1: null, score2: null, winner: null },
-                                { id: 104, court: "Sân Ecohome 4", p1: shuffled[6]?.name || '---', p2: shuffled[7]?.name || '---', score1: null, score2: null, winner: null }
+                                { id: 101, court: "Sân 1", p1: pool[0]?.name || '---', p2: pool[1]?.name || '---', score1: null, score2: null, winner: null },
+                                { id: 102, court: "Sân 2", p1: pool[2]?.name || '---', p2: pool[3]?.name || '---', score1: null, score2: null, winner: null },
+                                { id: 103, court: "Sân 3", p1: pool[4]?.name || '---', p2: pool[5]?.name || '---', score1: null, score2: null, winner: null },
+                                { id: 104, court: "Sân 4", p1: pool[6]?.name || '---', p2: pool[7]?.name || '---', score1: null, score2: null, winner: null }
                             ]
                         },
                         {
@@ -1557,7 +1711,7 @@
                 } else {
                     renderBracket();
                 }
-                showToast("Đã khởi tạo Giải đấu mới thành công!");
+                showToast("Đã khởi tạo Giải đấu mới thành công từ danh sách chọn!");
             });
         }
 
@@ -1671,6 +1825,7 @@
             const changeLogoBtn = document.getElementById('changeLogoBtn');
             const socialControls = document.getElementById('socialDrawAdminControls');
             const noticeBanner = document.getElementById('adminOnlyNoticeBanner');
+            const addNewsBtn = document.getElementById('addNewsBtn');
 
             // Inputs in social tab
             const socialInputs = ['socialCourtCount', 'socialMatchType', 'socialRoundCount', 'socialCourtPrefix'];
@@ -1684,6 +1839,7 @@
                 changeLogoBtn?.classList.remove('hidden');
                 socialControls?.classList.remove('hidden');
                 noticeBanner?.classList.add('hidden');
+                addNewsBtn?.classList.remove('hidden');
 
                 socialInputs.forEach(id => {
                     const el = document.getElementById(id);
@@ -1698,6 +1854,7 @@
                 changeLogoBtn?.classList.add('hidden');
                 socialControls?.classList.add('hidden');
                 noticeBanner?.classList.remove('hidden');
+                addNewsBtn?.classList.add('hidden');
 
                 socialInputs.forEach(id => {
                     const el = document.getElementById(id);
@@ -1707,6 +1864,7 @@
             renderMembers();
             renderBracket();
             renderSocialChecklist();
+            renderNewsFeed();
         }
 
         function openLogoModal() {
@@ -1820,6 +1978,148 @@
             }
         }
 
+        function openNewsModal() {
+            if (!isAdminLoggedIn) return;
+            document.getElementById('newsTitle').value = '';
+            document.getElementById('newsContent').value = '';
+            clearNewsImage();
+            document.getElementById('newsModal').classList.remove('hidden');
+        }
+
+        function closeNewsModal() {
+            document.getElementById('newsModal').classList.add('hidden');
+        }
+
+        function processNewsImage(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Limit width to prevent firestore size issues
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress to JPG
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    document.getElementById('newsImageBase64').value = base64;
+                    document.getElementById('newsImgPreview').src = base64;
+                    document.getElementById('newsImgPreviewContainer').classList.remove('hidden');
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearNewsImage() {
+            document.getElementById('newsImageBase64').value = '';
+            document.getElementById('newsImgPreview').src = '';
+            document.getElementById('newsImgPreviewContainer').classList.add('hidden');
+        }
+
+        async function saveNewsPost(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const title = document.getElementById('newsTitle').value.trim();
+            const content = document.getElementById('newsContent').value.trim();
+            const image = document.getElementById('newsImageBase64').value;
+            const id = Date.now().toString();
+
+            const post = {
+                id: id,
+                title: title,
+                content: content,
+                image: image,
+                timestamp: Date.now()
+            };
+
+            if (isAuthReady) {
+                try {
+                    await setDoc(doc(newsColRef, id), post);
+                    showToast("Đăng bài viết thành công!");
+                } catch(err) {
+                    console.error(err);
+                    showToast("Có lỗi xảy ra khi lưu bài viết", "error");
+                }
+            } else {
+                newsData.unshift(post);
+                renderNewsFeed();
+            }
+            closeNewsModal();
+        }
+
+        function deleteNewsPost(id) {
+            if (!isAdminLoggedIn) return;
+            customConfirm("Xóa Bài Viết", "Bạn có chắc chắn muốn xóa bài viết này khỏi bảng tin?", async () => {
+                if (isAuthReady) {
+                    await deleteDoc(doc(newsColRef, id));
+                    showToast("Đã xóa bài viết");
+                } else {
+                    newsData = newsData.filter(n => n.id !== id);
+                    renderNewsFeed();
+                }
+            });
+        }
+
+        function renderNewsFeed() {
+            const container = document.getElementById('newsFeedContainer');
+            if (!container) return;
+
+            if (newsData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-300">
+                        <i class="fa-solid fa-newspaper text-5xl mb-3 text-slate-200"></i>
+                        <p class="font-bold text-slate-500">Chưa có bài đăng nào.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            newsData.forEach(post => {
+                const dateStr = new Date(post.timestamp).toLocaleString('vi-VN');
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden relative";
+                
+                let imgHtml = '';
+                if (post.image) {
+                    imgHtml = `<img src="${post.image}" class="w-full h-48 sm:h-64 object-cover border-b border-slate-100" loading="lazy">`;
+                }
+
+                const adminControls = isAdminLoggedIn ? `
+                    <button onclick="deleteNewsPost('${post.id}')" class="absolute top-3 right-3 bg-white/90 hover:bg-red-50 text-red-500 hover:text-red-600 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm shadow-sm transition">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                ` : '';
+
+                card.innerHTML = `
+                    ${imgHtml}
+                    ${adminControls}
+                    <div class="p-5 sm:p-6">
+                        <div class="text-[10px] font-extrabold text-slate-400 mb-2 flex items-center gap-1.5 uppercase tracking-wide">
+                            <i class="fa-solid fa-clock text-purple-400"></i> ${dateStr}
+                        </div>
+                        <h4 class="text-lg sm:text-xl font-black text-slate-900 mb-2 leading-tight">${post.title}</h4>
+                        <p class="text-sm text-slate-600 whitespace-pre-line font-medium leading-relaxed">${post.content}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const adminModal = document.getElementById('adminModal');
@@ -1830,6 +2130,7 @@
                 document.getElementById('userAuthModal')?.classList.add('hidden');
                 closeMemberModal();
                 closeScoreModal();
+                closeNewsModal();
             }
         });
 
@@ -1865,6 +2166,13 @@
         window.generateNewBracketModal = generateNewBracketModal;
         window.autoProcessAvatar3x4 = autoProcessAvatar3x4;
         window.updateRegAvatarFromUrl = updateRegAvatarFromUrl;
+        window.openNewsModal = openNewsModal;
+        window.closeNewsModal = closeNewsModal;
+        window.processNewsImage = processNewsImage;
+        window.clearNewsImage = clearNewsImage;
+        window.saveNewsPost = saveNewsPost;
+        window.deleteNewsPost = deleteNewsPost;
+        window.renderSocialMatchResults = renderSocialMatchResults;
 
         window.addEventListener('load', () => {
             initFirebase();
