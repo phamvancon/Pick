@@ -243,9 +243,12 @@
                         </h2>
                         <p class="text-sm text-slate-500 font-medium mt-1">Ghép cặp ngẫu nhiên theo số sân, thể thức thi đấu & xoay vòng nhiều ván cân bằng DUPR</p>
                     </div>
-                    <div id="socialDrawAdminControls" class="hidden flex items-center gap-2">
+                    <div id="socialDrawAdminControls" class="hidden flex flex-wrap items-center gap-2">
                         <button onclick="selectAllMembersForSocial(true)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Chọn tất cả</button>
                         <button onclick="selectAllMembersForSocial(false)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Bỏ chọn</button>
+                        <button onclick="clearSocialDrawData()" class="bg-red-50 hover:bg-red-100 text-red-600 font-black px-3.5 py-2.5 rounded-xl text-xs border border-red-200 transition flex items-center gap-1.5 shadow-sm" title="Xóa toàn bộ lịch bốc thăm cũ để làm mới">
+                            <i class="fa-solid fa-trash-can"></i> Xóa Dữ Liệu Cũ
+                        </button>
                         <button onclick="generateRandomSocialMatches()" class="bg-gradient-to-r from-lime-500 to-lime-400 hover:from-lime-400 hover:to-lime-300 text-slate-950 font-black px-5 py-2.5 rounded-xl text-sm shadow-md shadow-lime-500/20 transition flex items-center gap-2">
                             <i class="fa-solid fa-dice"></i> Bốc Thăm Ngẫu Nhiên
                         </button>
@@ -312,12 +315,55 @@
                     <h2 class="text-2xl font-black text-slate-900 flex items-center gap-2.5">
                         <i class="fa-solid fa-trophy text-amber-500"></i> Sơ Đồ Thi Đấu Giải Nội Bộ
                     </h2>
-                    <p class="text-sm text-slate-500 font-medium mt-1">Lấy dữ liệu 8 người chơi đang được chọn ở tab Bốc Thăm để tạo nhánh đấu.</p>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Sơ đồ nhánh đấu tự động phân loại Đơn / Đôi, ghép cặp DUPR & cập nhật tiến độ Realtime</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
+                    <button id="toggleBracketConfigBtn" onclick="toggleBracketConfigPanel()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm border border-slate-200 transition flex items-center gap-2 shadow-xs">
+                        <i class="fa-solid fa-sliders text-amber-600"></i>
+                        <span id="toggleBracketConfigText">Hiện Tùy Chỉnh Sơ Đồ</span>
+                    </button>
                     <button id="setupBracketBtn" onclick="generateNewBracketModal()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-amber-500/20 transition flex items-center gap-2">
                         <i class="fa-solid fa-diagram-project"></i> Tạo Giải Từ Danh Sách Đã Chọn
                     </button>
+                </div>
+            </div>
+
+            <!-- ADMIN BRACKET CUSTOMIZATION PANEL (SHOW/HIDE TOGGLE) -->
+            <div id="bracketConfigPanel" class="hidden bg-gradient-to-r from-amber-50/80 via-white to-slate-50 p-6 rounded-3xl border border-amber-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-amber-200/70">
+                    <h3 class="text-sm font-black text-amber-900 flex items-center gap-2 uppercase tracking-wide">
+                        <i class="fa-solid fa-gear text-amber-600"></i> Bảng Tùy Chỉnh Sơ Đồ Thi Đấu (Admin Only)
+                    </h3>
+                    <span id="bracketStatusBadge" class="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                        Thể Thức Đánh Đôi
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Thể Thức Giải Đấu</label>
+                        <select id="bracketFormatType" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+                            <option value="doubles">Thi Đấu Đôi (2 VĐV vs 2 VĐV)</option>
+                            <option value="singles">Thi Đấu Đơn (1 VĐV vs 1 VĐV)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Cách Ghép Cặp (Dành Cho Đôi)</label>
+                        <select id="bracketPairingMethod" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+                            <option value="balanced">Cân Bằng DUPR (Hạt Giống + DUPR Thấp)</option>
+                            <option value="random">Trộn Cặp Ngẫu Nhiên</option>
+                            <option value="sequential">Theo Thứ Tự Chọn</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Tùy Chọn Hiển Thị Sơ Đồ</label>
+                        <button onclick="toggleBracketDetails()" id="btnToggleDetails" class="w-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-eye text-sky-600"></i>
+                            <span id="btnToggleDetailsText">Ẩn/Hiện Chi Tiết Điểm & Sân</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -327,7 +373,6 @@
                 </div>
             </div>
         </section>
-    </main>
 
     <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 shadow-sm mt-8">
         <div class="max-w-7xl mx-auto px-4">
@@ -705,33 +750,27 @@
 
         let tournamentBracket = {
             playerCount: 8,
+            bracketType: "doubles", // "singles" or "doubles"
+            hideDetails: false,
             rounds: [
                 {
                     roundName: "Vòng Tứ Kết",
                     matches: [
-                        { id: 101, court: "Sân Ecohome 1", p1: "Trần Minh Hoàng", p2: "Nguyễn Thị Phương", score1: 11, score2: 6, winner: "Trần Minh Hoàng" },
-                        { id: 102, court: "Sân Ecohome 2", p1: "Lê Quốc Bảo", p2: "Phạm Hải Yến", score1: 11, score2: 8, winner: "Lê Quốc Bảo" },
-                        { id: 103, court: "Sân Ecohome 3", p1: "Vũ Đức Thắng", p2: "Đặng Thu Hà", score1: 11, score2: 4, winner: "Vũ Đức Thắng" },
-                        { id: 104, court: "Sân Ecohome 4", p1: "Hoàng Văn Tuấn", p2: "Bùi Mai Anh", score1: 11, score2: 9, winner: "Hoàng Văn Tuấn" }
-                    ]
-                },
-                {
-                    roundName: "Vòng Bán Kết",
-                    matches: [
-                        { id: 201, court: "Sân Ecohome 1", p1: "Trần Minh Hoàng", p2: "Lê Quốc Bảo", score1: null, score2: null, winner: null },
-                        { id: 202, court: "Sân Ecohome 2", p1: "Vũ Đức Thắng", p2: "Hoàng Văn Tuấn", score1: null, score2: null, winner: null }
+                        { id: 101, court: "Sân Ecohome 1", p1: "Trần Minh Hoàng & Bùi Mai Anh", p2: "Nguyễn Thị Phương & Đặng Thu Hà", score1: 11, score2: 6, winner: "Trần Minh Hoàng & Bùi Mai Anh" },
+                        { id: 102, court: "Sân Ecohome 2", p1: "Lê Quốc Bảo & Hoàng Văn Tuấn", p2: "Phạm Hải Yến & Vũ Đức Thắng", score1: 11, score2: 8, winner: "Lê Quốc Bảo & Hoàng Văn Tuấn" }
                     ]
                 },
                 {
                     roundName: "Trận Chung Kết",
                     matches: [
-                        { id: 301, court: "Sân Chung Kết", p1: "---", p2: "---", score1: null, score2: null, winner: null }
+                        { id: 201, court: "Sân Chung Kết", p1: "Trần Minh Hoàng & Bùi Mai Anh", p2: "Lê Quốc Bảo & Hoàng Văn Tuấn", score1: null, score2: null, winner: null }
                     ]
                 }
             ],
             champion: null
         };
 
+        let isBracketConfigOpen = false;
         let clubLogoUrl = "";
         let tempLogoDataUrl = "";
         let isAdminLoggedIn = false;
@@ -1440,11 +1479,26 @@
 
             resultsContainer.innerHTML = '';
             
-            // Add Timestamp header
+            // Add Timestamp & Sharing Action Header
             const timeStr = new Date(currentSocialDraw.timestamp).toLocaleString('vi-VN');
             const headerInfo = document.createElement('div');
-            headerInfo.className = "flex items-center justify-between text-xs text-slate-500 font-bold bg-slate-50 px-4 py-2 rounded-xl border border-slate-200/80 mb-2";
-            headerInfo.innerHTML = `<span><i class="fa-solid fa-cloud text-sky-500 mr-1"></i> Dữ liệu Cloud đồng bộ: ${timeStr}</span><span>${currentSocialDraw.selectedCount} VĐV</span>`;
+            headerInfo.className = "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500 font-bold bg-slate-50 p-4 rounded-2xl border border-slate-200/80 mb-2";
+            headerInfo.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="bg-lime-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-[11px]">LỊCH BỐC THĂM MỚI NHẤT</span>
+                    <span><i class="fa-solid fa-cloud text-sky-500 mr-1"></i> Đồng bộ: ${timeStr} (${currentSocialDraw.selectedCount} VĐV)</span>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <button onclick="copySocialDrawToClipboard()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold px-3 py-1.5 rounded-xl border border-sky-200 transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-copy"></i> Sao Chép Gửi Zalo CLB
+                    </button>
+                    ${isAdminLoggedIn ? `
+                    <button onclick="clearSocialDrawData()" class="bg-red-50 hover:bg-red-100 text-red-600 font-extrabold px-3 py-1.5 rounded-xl border border-red-200 transition flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-trash-can"></i> Xóa Bảng Này
+                    </button>
+                    ` : ''}
+                </div>
+            `;
             resultsContainer.appendChild(headerInfo);
 
             currentSocialDraw.rounds.forEach(rData => {
@@ -1520,26 +1574,195 @@
             });
         }
 
+        async function clearSocialDrawData() {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền xóa dữ liệu bốc thăm!", "error");
+                return;
+            }
+
+            customConfirm("Xóa Dữ Liệu Bốc Thăm", "Bạn có chắc chắn muốn xóa toàn bộ kết quả bốc thăm hiện tại để làm mới không?", async () => {
+                currentSocialDraw = null;
+                if (isAuthReady) {
+                    try {
+                        await deleteDoc(socialDocRef);
+                    } catch (err) {
+                        console.error("Lỗi xóa dữ liệu Firestore:", err);
+                        await setDoc(socialDocRef, {});
+                    }
+                }
+                renderSocialMatchResults();
+                showToast("Đã xóa toàn bộ dữ liệu bốc thăm cũ!", "info");
+            });
+        }
+
+        function copySocialDrawToClipboard() {
+            if (!currentSocialDraw || !currentSocialDraw.rounds || currentSocialDraw.rounds.length === 0) {
+                showToast("Không có kết quả bốc thăm để sao chép!", "error");
+                return;
+            }
+
+            let text = `🎾 *LỊCH BỐC THĂM PHÂN SÂN - ECOHOME NHƠN BÌNH* 🎾\n`;
+            text += `⏱️ *Thời gian:* ${new Date(currentSocialDraw.timestamp).toLocaleString('vi-VN')}\n`;
+            text += `👥 *Tổng số VĐV:* ${currentSocialDraw.selectedCount} người\n\n`;
+
+            currentSocialDraw.rounds.forEach(r => {
+                text += `📌 *VÁN ${r.roundNum}:*\n`;
+                r.courts.forEach(c => {
+                    const teamAStr = c.teamA.map(p => p.name).join(' & ');
+                    const teamBStr = c.teamB.map(p => p.name).join(' & ');
+                    text += `• ${currentSocialDraw.courtPrefix} ${c.courtNum}: ${teamAStr}  VS  ${teamBStr}\n`;
+                });
+                if (r.waiting && r.waiting.length > 0) {
+                    text += `⏳ *Nghỉ ván ${r.roundNum}:* ${r.waiting.map(p => p.name).join(', ')}\n`;
+                }
+                text += `\n`;
+            });
+
+            text += `🔥 Chúc anh chị em thi đấu vui vẻ & nâng cao tay nghề! 🔥`;
+
+            // Fallback execCommand copy for iframe compatibility
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast("Đã sao chép danh sách bốc thăm! Bạn có thể dán (Paste) vào Zalo ngay.");
+            } catch (err) {
+                showToast("Không thể sao chép văn bản", "error");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function openScoreModal(roundIdx, matchIdx) {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền cập nhật trận đấu!", "error");
+                return;
+            }
+            const match = tournamentBracket.rounds?.[roundIdx]?.matches?.[matchIdx];
+            if (!match) return;
+
+            document.getElementById('matchRoundIdx').value = roundIdx;
+            document.getElementById('matchMatchIdx').value = matchIdx;
+            document.getElementById('matchCourtName').value = match.court || '';
+            document.getElementById('player1Input').value = match.p1 || '';
+            document.getElementById('player2Input').value = match.p2 || '';
+            document.getElementById('score1').value = match.score1 !== null && match.score1 !== undefined ? match.score1 : '';
+            document.getElementById('score2').value = match.score2 !== null && match.score2 !== undefined ? match.score2 : '';
+
+            document.getElementById('scoreModal').classList.remove('hidden');
+        }
+
+        function closeScoreModal() {
+            document.getElementById('scoreModal').classList.add('hidden');
+        }
+
+        async function saveMatchScore(e) {
+            e.preventDefault();
+            if (!isAdminLoggedIn) return;
+
+            const roundIdx = parseInt(document.getElementById('matchRoundIdx').value);
+            const matchIdx = parseInt(document.getElementById('matchMatchIdx').value);
+            const courtName = document.getElementById('matchCourtName').value.trim();
+            const p1 = document.getElementById('player1Input').value.trim();
+            const p2 = document.getElementById('player2Input').value.trim();
+            const score1Val = document.getElementById('score1').value;
+            const score2Val = document.getElementById('score2').value;
+
+            const match = tournamentBracket.rounds?.[roundIdx]?.matches?.[matchIdx];
+            if (!match) return;
+
+            match.court = courtName || `Sân ${matchIdx + 1}`;
+            match.p1 = p1 || '---';
+            match.p2 = p2 || '---';
+
+            const s1 = score1Val !== '' ? parseInt(score1Val) : null;
+            const s2 = score2Val !== '' ? parseInt(score2Val) : null;
+
+            match.score1 = s1;
+            match.score2 = s2;
+
+            if (s1 !== null && s2 !== null) {
+                if (s1 > s2) {
+                    match.winner = match.p1;
+                } else if (s2 > s1) {
+                    match.winner = match.p2;
+                } else {
+                    match.winner = null;
+                }
+            } else {
+                match.winner = null;
+            }
+
+            // Automatically advance winner to next round match
+            if (roundIdx + 1 < tournamentBracket.rounds.length) {
+                const nextRound = tournamentBracket.rounds[roundIdx + 1];
+                const nextMatchIdx = Math.floor(matchIdx / 2);
+                const nextMatch = nextRound.matches[nextMatchIdx];
+                if (nextMatch) {
+                    if (matchIdx % 2 === 0) {
+                        nextMatch.p1 = match.winner || '---';
+                    } else {
+                        nextMatch.p2 = match.winner || '---';
+                    }
+                }
+            } else if (roundIdx === tournamentBracket.rounds.length - 1) {
+                // Set Champion for final match
+                tournamentBracket.champion = match.winner || null;
+            }
+
+            if (isAuthReady) {
+                try {
+                    await setDoc(bracketDocRef, tournamentBracket);
+                } catch (err) {
+                    console.error("Error saving match score to Firestore:", err);
+                }
+            } else {
+                renderBracket();
+            }
+
+            showToast("Đã cập nhật thông tin trận đấu thành công!");
+            closeScoreModal();
+        }
+
         function renderBracket() {
             const container = document.getElementById('bracketTreeContainer');
             if(!container) return;
             container.innerHTML = '';
 
-            const defaultRoundTitles = ["Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
+            const defaultRoundTitles = ["Vòng 1", "Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
+            const isDoubles = (tournamentBracket.bracketType || 'doubles') === 'doubles';
+            const hideDetails = tournamentBracket.hideDetails || false;
+
+            // Update status badge if available
+            const statusBadge = document.getElementById('bracketStatusBadge');
+            if (statusBadge) {
+                statusBadge.innerText = isDoubles ? "Thể Thức Đánh Đôi (2vs2)" : "Thể Thức Đánh Đơn (1vs1)";
+                statusBadge.className = isDoubles 
+                    ? "bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black px-2.5 py-1 rounded-full uppercase" 
+                    : "bg-sky-100 text-sky-800 border border-sky-300 text-[10px] font-black px-2.5 py-1 rounded-full uppercase";
+            }
 
             (tournamentBracket.rounds || []).forEach((roundObj, roundIdx) => {
                 const column = document.createElement('div');
-                column.className = "flex flex-col justify-around h-full space-y-8 flex-1 min-w-[240px]";
+                column.className = "flex flex-col justify-around h-full space-y-8 flex-1 min-w-[250px]";
 
                 const roundHeader = document.createElement('h4');
-                roundHeader.className = "text-center text-xs font-black text-slate-600 uppercase tracking-wider mb-4 bg-slate-100 py-2 rounded-xl border border-slate-200";
-                roundHeader.innerText = roundObj.roundName || defaultRoundTitles[roundIdx] || `Vòng ${roundIdx + 1}`;
+                roundHeader.className = "text-center text-xs font-black text-slate-600 uppercase tracking-wider mb-4 bg-slate-100 py-2 rounded-xl border border-slate-200 flex items-center justify-center gap-1.5";
+                roundHeader.innerHTML = `
+                    <i class="fa-solid ${isDoubles ? 'fa-user-group text-amber-600' : 'fa-user text-sky-600'} text-xs"></i>
+                    <span>${roundObj.roundName || defaultRoundTitles[roundIdx] || `Vòng ${roundIdx + 1}`}</span>
+                `;
                 column.appendChild(roundHeader);
 
                 const roundMatches = roundObj.matches || [];
                 roundMatches.forEach((match, matchIdx) => {
                     const matchCard = document.createElement('div');
-                    matchCard.className = `bracket-match bg-white border border-slate-200/90 rounded-2xl p-3.5 relative shadow-sm ${isAdminLoggedIn ? 'cursor-pointer' : ''}`;
+                    matchCard.className = `bracket-match bg-white border border-slate-200/90 rounded-2xl p-3.5 relative shadow-sm ${isAdminLoggedIn ? 'cursor-pointer hover:border-amber-500' : ''}`;
                     
                     if (isAdminLoggedIn) {
                         matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
@@ -1549,24 +1772,26 @@
                     const isP2Winner = match.winner && match.winner === match.p2;
 
                     matchCard.innerHTML = `
+                        ${!hideDetails ? `
                         <div class="text-[10px] text-sky-700 font-extrabold mb-2 flex justify-between items-center border-b border-slate-100 pb-1.5 uppercase">
                             <span><i class="fa-solid fa-location-dot text-lime-600 mr-1"></i>${match.court || 'Sân thi đấu'}</span>
-                            ${isAdminLoggedIn ? `<span class="text-slate-400 hover:text-slate-800"><i class="fa-solid fa-pen-to-square"></i></span>` : ''}
+                            <span class="text-[9px] ${isDoubles ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'} px-1.5 py-0.5 rounded font-black">${isDoubles ? 'Đôi' : 'Đơn'}</span>
                         </div>
+                        ` : ''}
                         <div class="space-y-1.5">
                             <div class="flex justify-between items-center p-2 rounded-xl ${isP1Winner ? 'bg-lime-100 border border-lime-300' : 'bg-slate-50'}">
-                                <span class="text-xs font-bold ${isP1Winner ? 'text-lime-900' : 'text-slate-700'} truncate max-w-[140px]">
+                                <span class="text-xs font-bold ${isP1Winner ? 'text-lime-900 font-black' : 'text-slate-700'} truncate max-w-[170px]" title="${match.p1 || '---'}">
                                     ${match.p1 || '---'}
                                 </span>
-                                <span class="text-xs font-mono font-black ${isP1Winner ? 'text-lime-800' : 'text-slate-400'}">
+                                <span class="text-xs font-mono font-black ${isP1Winner ? 'text-lime-800' : 'text-slate-400'} ml-2">
                                     ${match.score1 !== null && match.score1 !== undefined ? match.score1 : '-'}
                                 </span>
                             </div>
                             <div class="flex justify-between items-center p-2 rounded-xl ${isP2Winner ? 'bg-lime-100 border border-lime-300' : 'bg-slate-50'}">
-                                <span class="text-xs font-bold ${isP2Winner ? 'text-lime-900' : 'text-slate-700'} truncate max-w-[140px]">
+                                <span class="text-xs font-bold ${isP2Winner ? 'text-lime-900 font-black' : 'text-slate-700'} truncate max-w-[170px]" title="${match.p2 || '---'}">
                                     ${match.p2 || '---'}
                                 </span>
-                                <span class="text-xs font-mono font-black ${isP2Winner ? 'text-lime-800' : 'text-slate-400'}">
+                                <span class="text-xs font-mono font-black ${isP2Winner ? 'text-lime-800' : 'text-slate-400'} ml-2">
                                     ${match.score2 !== null && match.score2 !== undefined ? match.score2 : '-'}
                                 </span>
                             </div>
@@ -1583,101 +1808,37 @@
             champCol.innerHTML = `
                 <div class="text-center p-6 bg-gradient-to-b from-amber-100 via-amber-50 to-white border-2 border-amber-300 rounded-3xl w-full shadow-md">
                     <i class="fa-solid fa-trophy text-5xl text-amber-500 mb-2 animate-bounce"></i>
-                    <h4 class="text-xs font-black text-amber-800 uppercase tracking-widest mb-1">QUÁN QUÂN</h4>
-                    <p class="text-base font-black text-slate-900 truncate">${tournamentBracket.champion || 'Chưa xác định'}</p>
+                    <h4 class="text-xs font-black text-amber-800 uppercase tracking-widest mb-1">QUÁN QUÂN (${isDoubles ? 'CẶP ĐÔI' : 'ĐƠN'})</h4>
+                    <p class="text-base font-black text-slate-900 truncate" title="${tournamentBracket.champion || 'Chưa xác định'}">${tournamentBracket.champion || 'Chưa xác định'}</p>
                 </div>
             `;
             container.appendChild(champCol);
         }
 
-        function openScoreModal(roundIdx, matchIdx) {
+        function toggleBracketConfigPanel() {
             if (!isAdminLoggedIn) {
-                showToast("Chỉ Admin mới có quyền cập nhật điểm số & sửa tên trận đấu!", "error");
+                showToast("Chỉ Admin mới có quyền bật/tắt bảng tùy chỉnh sơ đồ!", "error");
                 return;
             }
 
-            const match = tournamentBracket.rounds[roundIdx]?.matches?.[matchIdx];
-            if (!match) {
-                showToast("Không tìm thấy trận đấu!", "error");
-                return;
-            }
+            const panel = document.getElementById('bracketConfigPanel');
+            const text = document.getElementById('toggleBracketConfigText');
 
-            document.getElementById('matchRoundIdx').value = roundIdx;
-            document.getElementById('matchMatchIdx').value = matchIdx;
-            document.getElementById('matchCourtName').value = match.court || `Sân Ecohome ${matchIdx + 1}`;
-            document.getElementById('player1Input').value = match.p1 && match.p1 !== '---' ? match.p1 : '';
-            document.getElementById('player2Input').value = match.p2 && match.p2 !== '---' ? match.p2 : '';
-            document.getElementById('score1').value = match.score1 !== null && match.score1 !== undefined ? match.score1 : '';
-            document.getElementById('score2').value = match.score2 !== null && match.score2 !== undefined ? match.score2 : '';
+            isBracketConfigOpen = !isBracketConfigOpen;
 
-            document.getElementById('scoreModal').classList.remove('hidden');
-        }
-
-        function closeScoreModal() {
-            document.getElementById('scoreModal').classList.add('hidden');
-        }
-
-        async function saveMatchScore(e) {
-            e.preventDefault();
-            if (!isAdminLoggedIn) {
-                showToast("Chỉ Admin mới có quyền lưu trận đấu!", "error");
-                return;
-            }
-
-            const roundIdx = parseInt(document.getElementById('matchRoundIdx').value);
-            const matchIdx = parseInt(document.getElementById('matchMatchIdx').value);
-            const courtName = document.getElementById('matchCourtName').value.trim();
-            const p1Name = document.getElementById('player1Input').value.trim() || '---';
-            const p2Name = document.getElementById('player2Input').value.trim() || '---';
-            const rawScore1 = document.getElementById('score1').value;
-            const rawScore2 = document.getElementById('score2').value;
-
-            const match = tournamentBracket.rounds[roundIdx].matches[matchIdx];
-            
-            // Allow name updates without forcing immediate score entry
-            match.court = courtName || match.court;
-            match.p1 = p1Name;
-            match.p2 = p2Name;
-
-            if (rawScore1 !== "" && rawScore2 !== "") {
-                const s1 = parseInt(rawScore1);
-                const s2 = parseInt(rawScore2);
-
-                if (s1 === s2) {
-                    showToast("Tỷ số Pickleball không được hòa!", "error");
-                    return;
-                }
-
-                match.score1 = s1;
-                match.score2 = s2;
-                match.winner = s1 > s2 ? match.p1 : match.p2;
-
-                // Advance winner to the next round if available
-                if (roundIdx + 1 < tournamentBracket.rounds.length) {
-                    const nextMatchIdx = Math.floor(matchIdx / 2);
-                    const nextMatch = tournamentBracket.rounds[roundIdx + 1].matches[nextMatchIdx];
-                    if (matchIdx % 2 === 0) {
-                        nextMatch.p1 = match.winner;
-                    } else {
-                        nextMatch.p2 = match.winner;
-                    }
-                } else {
-                    tournamentBracket.champion = match.winner;
-                }
-            }
-
-            if (isAuthReady) {
-                try {
-                    await setDoc(bracketDocRef, tournamentBracket);
-                } catch (err) {
-                    console.error("Error updating bracket:", err);
-                }
+            if (isBracketConfigOpen) {
+                panel?.classList.remove('hidden');
+                if (text) text.innerText = "Ẩn Tùy Chỉnh Sơ Đồ";
             } else {
-                renderBracket();
+                panel?.classList.add('hidden');
+                if (text) text.innerText = "Hiện Tùy Chỉnh Sơ Đồ";
             }
+        }
 
-            closeScoreModal();
-            showToast(match.winner ? `Đã cập nhật chiến thắng cho ${match.winner}!` : "Đã cập nhật thông tin trận đấu!");
+        function toggleBracketDetails() {
+            tournamentBracket.hideDetails = !tournamentBracket.hideDetails;
+            renderBracket();
+            showToast(tournamentBracket.hideDetails ? "Đã chuyển sang chế độ xem sơ đồ rút gọn" : "Đã hiển thị chi tiết điểm & sân thi đấu");
         }
 
         function generateNewBracketModal() {
@@ -1690,20 +1851,68 @@
             const selectedIds = Array.from(checkboxes).map(cb => cb.value.toString());
             let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id.toString()));
 
-            if (selectedPlayers.length < 2) {
-                showToast("Vui lòng tích chọn ít nhất 2 thành viên ở tab Bốc Thăm để tạo sơ đồ!", "error");
+            const formatType = document.getElementById('bracketFormatType')?.value || 'doubles';
+            const pairingMethod = document.getElementById('bracketPairingMethod')?.value || 'balanced';
+
+            const minPlayersNeeded = formatType === 'doubles' ? 4 : 2;
+
+            if (selectedPlayers.length < minPlayersNeeded) {
+                showToast(`Vui lòng chọn ít nhất ${minPlayersNeeded} thành viên ở tab Bốc Thăm để tạo sơ đồ ${formatType === 'doubles' ? 'Đôi' : 'Đơn'}!`, "error");
                 return;
             }
 
-            const totalCount = selectedPlayers.length;
-            // Determine bracket size (4, 8, 16, or 32)
+            // Form teams/pairs if format is doubles
+            let contestants = [];
+
+            if (formatType === 'doubles') {
+                let pool = [...selectedPlayers];
+
+                if (pairingMethod === 'balanced') {
+                    // Sort by DUPR rating descending
+                    pool.sort((a,b) => (parseFloat(b.rating)||0) - (parseFloat(a.rating)||0));
+                    while (pool.length >= 2) {
+                        const top = pool.shift();
+                        const bottom = pool.pop();
+                        contestants.push({ name: `${top.name} & ${bottom.name}` });
+                    }
+                    if (pool.length === 1) {
+                        contestants.push({ name: `${pool[0].name} & ( Ghép Lẻ )` });
+                    }
+                } else if (pairingMethod === 'random') {
+                    pool.sort(() => Math.random() - 0.5);
+                    for (let i = 0; i < pool.length; i += 2) {
+                        if (i + 1 < pool.length) {
+                            contestants.push({ name: `${pool[i].name} & ${pool[i+1].name}` });
+                        } else {
+                            contestants.push({ name: `${pool[i].name} & ( Ghép Lẻ )` });
+                        }
+                    }
+                } else { // Sequential
+                    for (let i = 0; i < pool.length; i += 2) {
+                        if (i + 1 < pool.length) {
+                            contestants.push({ name: `${pool[i].name} & ${pool[i+1].name}` });
+                        } else {
+                            contestants.push({ name: `${pool[i].name} & ( Ghép Lẻ )` });
+                        }
+                    }
+                }
+            } else {
+                // Singles format
+                contestants = selectedPlayers.map(p => ({ name: p.name }));
+            }
+
+            const totalCount = contestants.length;
+            // Determine bracket size (2, 4, 8, 16, or 32)
             let bracketSize = 4;
             if (totalCount > 16) bracketSize = 32;
             else if (totalCount > 8) bracketSize = 16;
             else if (totalCount > 4) bracketSize = 8;
+            else if (totalCount === 2) bracketSize = 2;
 
-            customConfirm("Tạo Sơ Đồ Thi Đấu Mới", `Tạo sơ đồ thi đấu quy mô ${bracketSize} đội (${totalCount} VĐV được chọn, tự động chèn nhánh BYE đặc cách nếu lẻ)?`, async () => {
-                let pool = [...selectedPlayers].sort(() => Math.random() - 0.5);
+            const formatTitle = formatType === 'doubles' ? 'Thi Đấu Đôi' : 'Thi Đấu Đơn';
+
+            customConfirm("Tạo Sơ Đồ Thi Đấu Mới", `Tạo sơ đồ ${formatTitle} quy mô ${bracketSize} đội (${totalCount} suất thi đấu được chọn, tự động chèn nhánh BYE đặc cách nếu lẻ)?`, async () => {
+                let pool = [...contestants].sort(() => Math.random() - 0.5);
                 
                 // Pad remaining slots with "BYE (Đặc cách)"
                 while(pool.length < bracketSize) {
@@ -1712,6 +1921,7 @@
 
                 const totalRounds = Math.log2(bracketSize);
                 const roundNames = ["Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
+                if (bracketSize === 2) roundNames[0] = "Trận Chung Kết";
                 if (bracketSize === 16) roundNames.unshift("Vòng 1/8 (16 Đội)");
                 if (bracketSize === 32) roundNames.unshift("Vòng 1/16 (32 Đội)", "Vòng 1/8 (16 Đội)");
 
@@ -1723,7 +1933,6 @@
                     const p1 = pool[i * 2]?.name || '---';
                     const p2 = pool[i * 2 + 1]?.name || '---';
                     
-                    // Auto advance if playing against BYE
                     let winner = null;
                     let score1 = null;
                     let score2 = null;
@@ -1783,6 +1992,8 @@
                 tournamentBracket = {
                     playerCount: totalCount,
                     bracketSize: bracketSize,
+                    bracketType: formatType,
+                    hideDetails: false,
                     rounds: newRounds,
                     champion: null
                 };
@@ -1796,7 +2007,7 @@
                 } else {
                     renderBracket();
                 }
-                showToast(`Đã tạo thành công Sơ đồ giải quy mô ${bracketSize} đội!`);
+                showToast(`Đã tạo sơ đồ ${formatTitle} quy mô ${bracketSize} đội thành công!`);
             });
         }
 
@@ -1907,6 +2118,7 @@
             const adminText = document.getElementById('adminText');
             const addMemberBtn = document.getElementById('addMemberBtn');
             const setupBracketBtn = document.getElementById('setupBracketBtn');
+            const toggleBracketConfigBtn = document.getElementById('toggleBracketConfigBtn');
             const changeLogoBtn = document.getElementById('changeLogoBtn');
             const socialControls = document.getElementById('socialDrawAdminControls');
             const noticeBanner = document.getElementById('adminOnlyNoticeBanner');
@@ -1921,6 +2133,7 @@
                 adminText.innerText = "Thoát Admin";
                 addMemberBtn?.classList.remove('hidden');
                 setupBracketBtn?.classList.remove('hidden');
+                toggleBracketConfigBtn?.classList.remove('hidden');
                 changeLogoBtn?.classList.remove('hidden');
                 socialControls?.classList.remove('hidden');
                 noticeBanner?.classList.add('hidden');
@@ -1936,6 +2149,7 @@
                 adminText.innerText = "Admin";
                 addMemberBtn?.classList.add('hidden');
                 setupBracketBtn?.classList.add('hidden');
+                toggleBracketConfigBtn?.classList.add('hidden');
                 changeLogoBtn?.classList.add('hidden');
                 socialControls?.classList.add('hidden');
                 noticeBanner?.classList.remove('hidden');
@@ -2249,6 +2463,8 @@
         window.closeScoreModal = closeScoreModal;
         window.saveMatchScore = saveMatchScore;
         window.generateNewBracketModal = generateNewBracketModal;
+        window.toggleBracketConfigPanel = toggleBracketConfigPanel;
+        window.toggleBracketDetails = toggleBracketDetails;
         window.autoProcessAvatar3x4 = autoProcessAvatar3x4;
         window.updateRegAvatarFromUrl = updateRegAvatarFromUrl;
         window.openNewsModal = openNewsModal;
@@ -2258,6 +2474,8 @@
         window.saveNewsPost = saveNewsPost;
         window.deleteNewsPost = deleteNewsPost;
         window.renderSocialMatchResults = renderSocialMatchResults;
+        window.clearSocialDrawData = clearSocialDrawData;
+        window.copySocialDrawToClipboard = copySocialDrawToClipboard;
 
         window.addEventListener('load', () => {
             initFirebase();
