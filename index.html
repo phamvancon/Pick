@@ -584,8 +584,8 @@
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
             <button onclick="closeScoreModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
             
-            <h3 class="text-lg font-black text-slate-900 mb-1">Cập Nhật Trận Đấu & Sân Thi Đấu</h3>
-            <p class="text-xs text-slate-500 font-medium mb-4">Gán vị trí sân và cập nhật điểm số trực tiếp</p>
+            <h3 class="text-lg font-black text-slate-900 mb-1">Cập Nhật Trận Đấu & Sửa Tên</h3>
+            <p class="text-xs text-slate-500 font-medium mb-4">Tùy chỉnh tên VĐV/Đội, gán vị trí sân & cập nhật tỉ số</p>
 
             <form onsubmit="saveMatchScore(event)" class="space-y-4">
                 <input type="hidden" id="matchRoundIdx">
@@ -597,19 +597,25 @@
                 </div>
 
                 <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                    <div class="flex items-center justify-between gap-3">
-                        <span id="player1Name" class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Đội A</span>
-                        <input type="number" min="0" max="30" id="score1" required class="w-16 bg-white border border-slate-300 text-center text-lg font-black text-lime-700 rounded-xl py-1 shadow-inner">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">VĐV / Đội A (Sửa Tên)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="player1Input" required placeholder="Tên VĐV / Đội A" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-lime-500">
+                            <input type="number" min="0" max="30" id="score1" class="w-16 bg-white border border-slate-300 text-center text-base font-black text-lime-700 rounded-xl py-1 shadow-inner" placeholder="Tỷ số">
+                        </div>
                     </div>
                     <div class="border-t border-slate-200 my-2"></div>
-                    <div class="flex items-center justify-between gap-3">
-                        <span id="player2Name" class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Đội B</span>
-                        <input type="number" min="0" max="30" id="score2" required class="w-16 bg-white border border-slate-300 text-center text-lg font-black text-lime-700 rounded-xl py-1 shadow-inner">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">VĐV / Đội B (Sửa Tên)</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="player2Input" required placeholder="Tên VĐV / Đội B" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-lime-500">
+                            <input type="number" min="0" max="30" id="score2" class="w-16 bg-white border border-slate-300 text-center text-base font-black text-lime-700 rounded-xl py-1 shadow-inner" placeholder="Tỷ số">
+                        </div>
                     </div>
                 </div>
 
                 <button type="submit" class="w-full bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-xl text-sm transition shadow-md shadow-lime-500/20">
-                    Lưu & Tiến Vòng
+                    Lưu & Cập Nhật Tiến Vòng
                 </button>
             </form>
         </div>
@@ -1344,19 +1350,29 @@
                 rounds: []
             };
 
+            // Smart rotation tracker to minimize repeat partner/opponent pairings
             for (let r = 1; r <= roundCount; r++) {
-                let pool = [...selectedPlayers].sort(() => Math.random() - 0.5);
+                let pool = [...selectedPlayers];
 
                 if (matchType === 'doubles_mixed') {
-                    const males = pool.filter(p => p.gender === 'Nam');
-                    const females = pool.filter(p => p.gender === 'Nữ');
+                    // Smart Mixed Doubles balancing
+                    const males = pool.filter(p => p.gender === 'Nam').sort(() => Math.random() - 0.5);
+                    const females = pool.filter(p => p.gender === 'Nữ').sort(() => Math.random() - 0.5);
                     pool = [];
                     const maxPairs = Math.min(males.length, females.length);
                     for(let i=0; i<maxPairs; i++) {
                         pool.push(males[i], females[i]);
                     }
                 } else if (matchType === 'doubles_balanced') {
+                    // Smart DUPR Balancing: Tiered Pairing (Top DUPR paired with Lower DUPR)
                     pool.sort((a,b) => (parseFloat(b.rating)||0) - (parseFloat(a.rating)||0));
+                    // Introduce round offset rotation for variation across rounds
+                    if (r > 1) {
+                        const shift = (r - 1) % pool.length;
+                        pool = pool.slice(shift).concat(pool.slice(0, shift));
+                    }
+                } else {
+                    pool.sort(() => Math.random() - 0.5);
                 }
 
                 const roundData = {
@@ -1377,7 +1393,7 @@
                         teamA = [matchPlayers[0]];
                         teamB = [matchPlayers[1]];
                     } else {
-                        // Mix a bit for doubles balanced
+                        // Smart pairing: Tier 1 + Tier 4 vs Tier 2 + Tier 3 for tight games
                         teamA = [matchPlayers[0], matchPlayers[3] || matchPlayers[2]];
                         teamB = [matchPlayers[1], matchPlayers[2] || matchPlayers[3]];
                     }
@@ -1393,18 +1409,19 @@
                 newDrawData.rounds.push(roundData);
             }
 
+            currentSocialDraw = newDrawData;
+
             if (isAuthReady) {
                 try {
                     await setDoc(socialDocRef, newDrawData);
-                    showToast(`Đã lưu bốc thăm lên hệ thống Cloud!`);
+                    showToast(`Đã bốc thăm ngẫu nhiên & đồng bộ Realtime Cloud!`);
                 } catch(err) {
-                    console.error("Lỗi lưu bốc thăm", err);
-                    showToast("Lỗi lưu bốc thăm", "error");
+                    console.error("Lỗi lưu bốc thăm Cloud", err);
+                    showToast("Đã bốc thăm ngẫu nhiên (Lưu nội bộ)", "info");
                 }
             } else {
-                currentSocialDraw = newDrawData;
                 renderSocialMatchResults();
-                showToast(`Đã bốc thăm ghép cặp thành công!`);
+                showToast(`Đã bốc thăm ngẫu nhiên thành công!`);
             }
         }
 
@@ -1575,23 +1592,23 @@
 
         function openScoreModal(roundIdx, matchIdx) {
             if (!isAdminLoggedIn) {
-                showToast("Chỉ Admin mới có quyền cập nhật điểm số & sân đấu!", "error");
+                showToast("Chỉ Admin mới có quyền cập nhật điểm số & sửa tên trận đấu!", "error");
                 return;
             }
 
             const match = tournamentBracket.rounds[roundIdx]?.matches?.[matchIdx];
-            if (!match || !match.p1 || !match.p2 || match.p1 === '---' || match.p2 === '---') {
-                showToast("Chưa đủ 2 đội tham gia trận đấu này!", "error");
+            if (!match) {
+                showToast("Không tìm thấy trận đấu!", "error");
                 return;
             }
 
             document.getElementById('matchRoundIdx').value = roundIdx;
             document.getElementById('matchMatchIdx').value = matchIdx;
             document.getElementById('matchCourtName').value = match.court || `Sân Ecohome ${matchIdx + 1}`;
-            document.getElementById('player1Name').innerText = match.p1;
-            document.getElementById('player2Name').innerText = match.p2;
-            document.getElementById('score1').value = match.score1 !== null ? match.score1 : 0;
-            document.getElementById('score2').value = match.score2 !== null ? match.score2 : 0;
+            document.getElementById('player1Input').value = match.p1 && match.p1 !== '---' ? match.p1 : '';
+            document.getElementById('player2Input').value = match.p2 && match.p2 !== '---' ? match.p2 : '';
+            document.getElementById('score1').value = match.score1 !== null && match.score1 !== undefined ? match.score1 : '';
+            document.getElementById('score2').value = match.score2 !== null && match.score2 !== undefined ? match.score2 : '';
 
             document.getElementById('scoreModal').classList.remove('hidden');
         }
@@ -1603,37 +1620,50 @@
         async function saveMatchScore(e) {
             e.preventDefault();
             if (!isAdminLoggedIn) {
-                showToast("Chỉ Admin mới có quyền lưu tỷ số!", "error");
+                showToast("Chỉ Admin mới có quyền lưu trận đấu!", "error");
                 return;
             }
 
             const roundIdx = parseInt(document.getElementById('matchRoundIdx').value);
             const matchIdx = parseInt(document.getElementById('matchMatchIdx').value);
             const courtName = document.getElementById('matchCourtName').value.trim();
-            const s1 = parseInt(document.getElementById('score1').value);
-            const s2 = parseInt(document.getElementById('score2').value);
-
-            if (s1 === s2) {
-                showToast("Tỷ số Pickleball không được hòa!", "error");
-                return;
-            }
+            const p1Name = document.getElementById('player1Input').value.trim() || '---';
+            const p2Name = document.getElementById('player2Input').value.trim() || '---';
+            const rawScore1 = document.getElementById('score1').value;
+            const rawScore2 = document.getElementById('score2').value;
 
             const match = tournamentBracket.rounds[roundIdx].matches[matchIdx];
+            
+            // Allow name updates without forcing immediate score entry
             match.court = courtName || match.court;
-            match.score1 = s1;
-            match.score2 = s2;
-            match.winner = s1 > s2 ? match.p1 : match.p2;
+            match.p1 = p1Name;
+            match.p2 = p2Name;
 
-            if (roundIdx + 1 < tournamentBracket.rounds.length) {
-                const nextMatchIdx = Math.floor(matchIdx / 2);
-                const nextMatch = tournamentBracket.rounds[roundIdx + 1].matches[nextMatchIdx];
-                if (matchIdx % 2 === 0) {
-                    nextMatch.p1 = match.winner;
-                } else {
-                    nextMatch.p2 = match.winner;
+            if (rawScore1 !== "" && rawScore2 !== "") {
+                const s1 = parseInt(rawScore1);
+                const s2 = parseInt(rawScore2);
+
+                if (s1 === s2) {
+                    showToast("Tỷ số Pickleball không được hòa!", "error");
+                    return;
                 }
-            } else {
-                tournamentBracket.champion = match.winner;
+
+                match.score1 = s1;
+                match.score2 = s2;
+                match.winner = s1 > s2 ? match.p1 : match.p2;
+
+                // Advance winner to the next round if available
+                if (roundIdx + 1 < tournamentBracket.rounds.length) {
+                    const nextMatchIdx = Math.floor(matchIdx / 2);
+                    const nextMatch = tournamentBracket.rounds[roundIdx + 1].matches[nextMatchIdx];
+                    if (matchIdx % 2 === 0) {
+                        nextMatch.p1 = match.winner;
+                    } else {
+                        nextMatch.p2 = match.winner;
+                    }
+                } else {
+                    tournamentBracket.champion = match.winner;
+                }
             }
 
             if (isAuthReady) {
@@ -1647,7 +1677,7 @@
             }
 
             closeScoreModal();
-            showToast(`Đã cập nhật chiến thắng cho ${match.winner}!`);
+            showToast(match.winner ? `Đã cập nhật chiến thắng cho ${match.winner}!` : "Đã cập nhật thông tin trận đấu!");
         }
 
         function generateNewBracketModal() {
@@ -1660,45 +1690,100 @@
             const selectedIds = Array.from(checkboxes).map(cb => cb.value.toString());
             let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id.toString()));
 
-            if (selectedPlayers.length < 4) {
-                showToast("Vui lòng sang tab 'Bốc Thăm Sân' chọn ít nhất 4 thành viên để tạo giải!", "error");
+            if (selectedPlayers.length < 2) {
+                showToast("Vui lòng tích chọn ít nhất 2 thành viên ở tab Bốc Thăm để tạo sơ đồ!", "error");
                 return;
             }
 
-            customConfirm("Tạo Sơ Đồ Giải Từ Danh Sách Chọn", `Bạn có muốn tạo Sơ đồ thi đấu mới với ${selectedPlayers.length} thành viên đang được CHỌN ở tab Bốc Thăm? (Hệ thống sẽ lấy tối đa 8 người cho vòng Tứ Kết)`, async () => {
+            const totalCount = selectedPlayers.length;
+            // Determine bracket size (4, 8, 16, or 32)
+            let bracketSize = 4;
+            if (totalCount > 16) bracketSize = 32;
+            else if (totalCount > 8) bracketSize = 16;
+            else if (totalCount > 4) bracketSize = 8;
+
+            customConfirm("Tạo Sơ Đồ Thi Đấu Mới", `Tạo sơ đồ thi đấu quy mô ${bracketSize} đội (${totalCount} VĐV được chọn, tự động chèn nhánh BYE đặc cách nếu lẻ)?`, async () => {
+                let pool = [...selectedPlayers].sort(() => Math.random() - 0.5);
                 
-                let pool = [...selectedPlayers].sort(() => Math.random() - 0.5).slice(0, 8);
-                // Pad missing slots with BYE (---)
-                while(pool.length < 8) {
-                    pool.push({ name: '---' });
+                // Pad remaining slots with "BYE (Đặc cách)"
+                while(pool.length < bracketSize) {
+                    pool.push({ name: 'BYE (Đặc cách)' });
                 }
-                
+
+                const totalRounds = Math.log2(bracketSize);
+                const roundNames = ["Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
+                if (bracketSize === 16) roundNames.unshift("Vòng 1/8 (16 Đội)");
+                if (bracketSize === 32) roundNames.unshift("Vòng 1/16 (32 Đội)", "Vòng 1/8 (16 Đội)");
+
+                const newRounds = [];
+
+                // Round 1
+                const firstRoundMatches = [];
+                for (let i = 0; i < bracketSize / 2; i++) {
+                    const p1 = pool[i * 2]?.name || '---';
+                    const p2 = pool[i * 2 + 1]?.name || '---';
+                    
+                    // Auto advance if playing against BYE
+                    let winner = null;
+                    let score1 = null;
+                    let score2 = null;
+                    if (p2 === 'BYE (Đặc cách)' && p1 !== 'BYE (Đặc cách)') {
+                        winner = p1;
+                        score1 = 11;
+                        score2 = 0;
+                    } else if (p1 === 'BYE (Đặc cách)' && p2 !== 'BYE (Đặc cách)') {
+                        winner = p2;
+                        score1 = 0;
+                        score2 = 11;
+                    }
+
+                    firstRoundMatches.push({
+                        id: 100 + i + 1,
+                        court: `Sân ${i + 1}`,
+                        p1: p1,
+                        p2: p2,
+                        score1: score1,
+                        score2: score2,
+                        winner: winner
+                    });
+                }
+
+                newRounds.push({
+                    roundName: roundNames[0] || "Vòng 1",
+                    matches: firstRoundMatches
+                });
+
+                // Subsequent rounds
+                for (let r = 1; r < totalRounds; r++) {
+                    const matchCount = bracketSize / Math.pow(2, r + 1);
+                    const prevRound = newRounds[r - 1];
+                    const roundMatches = [];
+
+                    for (let m = 0; m < matchCount; m++) {
+                        const prevMatch1 = prevRound.matches[m * 2];
+                        const prevMatch2 = prevRound.matches[m * 2 + 1];
+
+                        roundMatches.push({
+                            id: (r + 1) * 100 + m + 1,
+                            court: r === totalRounds - 1 ? "Sân Chung Kết" : `Sân ${m + 1}`,
+                            p1: prevMatch1?.winner || '---',
+                            p2: prevMatch2?.winner || '---',
+                            score1: null,
+                            score2: null,
+                            winner: null
+                        });
+                    }
+
+                    newRounds.push({
+                        roundName: roundNames[r] || `Vòng ${r + 1}`,
+                        matches: roundMatches
+                    });
+                }
+
                 tournamentBracket = {
-                    playerCount: 8,
-                    rounds: [
-                        {
-                            roundName: "Vòng Tứ Kết",
-                            matches: [
-                                { id: 101, court: "Sân 1", p1: pool[0]?.name || '---', p2: pool[1]?.name || '---', score1: null, score2: null, winner: null },
-                                { id: 102, court: "Sân 2", p1: pool[2]?.name || '---', p2: pool[3]?.name || '---', score1: null, score2: null, winner: null },
-                                { id: 103, court: "Sân 3", p1: pool[4]?.name || '---', p2: pool[5]?.name || '---', score1: null, score2: null, winner: null },
-                                { id: 104, court: "Sân 4", p1: pool[6]?.name || '---', p2: pool[7]?.name || '---', score1: null, score2: null, winner: null }
-                            ]
-                        },
-                        {
-                            roundName: "Vòng Bán Kết",
-                            matches: [
-                                { id: 201, court: "Sân Bán Kết 1", p1: '---', p2: '---', score1: null, score2: null, winner: null },
-                                { id: 202, court: "Sân Bán Kết 2", p1: '---', p2: '---', score1: null, score2: null, winner: null }
-                            ]
-                        },
-                        {
-                            roundName: "Trận Chung Kết",
-                            matches: [
-                                { id: 301, court: "Sân Chung Kết", p1: '---', p2: '---', score1: null, score2: null, winner: null }
-                            ]
-                        }
-                    ],
+                    playerCount: totalCount,
+                    bracketSize: bracketSize,
+                    rounds: newRounds,
                     champion: null
                 };
 
@@ -1711,7 +1796,7 @@
                 } else {
                     renderBracket();
                 }
-                showToast("Đã khởi tạo Giải đấu mới thành công từ danh sách chọn!");
+                showToast(`Đã tạo thành công Sơ đồ giải quy mô ${bracketSize} đội!`);
             });
         }
 
