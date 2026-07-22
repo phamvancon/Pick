@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLB Pickleball Ecohome Nhơn Bình</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -69,7 +70,6 @@
             box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.25);
         }
 
-        /* Custom Cropper Modal Styling */
         .cropper-container {
             border-radius: 1rem;
             overflow: hidden;
@@ -94,7 +94,7 @@
         }
     </style>
 </head>
-<body class="flex flex-col justify-between selection:bg-brand-500 selection:text-slate-950 court-bg-pattern">
+<body class="flex flex-col justify-between selection:bg-brand-500 selection:text-slate-950 court-bg-pattern min-h-screen">
 
     <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,7 +255,6 @@
                         <select id="socialMatchType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 font-bold focus:outline-none focus:border-lime-500">
                             <option value="doubles_balanced">Đánh Đôi - Cân bằng DUPR (2 vs 2)</option>
                             <option value="doubles_mixed">Đánh Đôi Nam - Nữ (Mixed Doubles)</option>
-                            <option value="doubles_gender">Đánh Đôi Cùng Giới (Nam/Nữ)</option>
                             <option value="singles">Đánh Đơn (1 vs 1)</option>
                         </select>
                     </div>
@@ -305,17 +304,7 @@
                     <p class="text-sm text-slate-500 font-medium mt-1">Cây Knockout trực quan chuyên nghiệp, cập nhật vị trí sân và tỷ số trực tiếp</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <select id="bracketFormatType" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:outline-none">
-                        <option value="doubles">Giải Đánh Đôi (2 người/đội)</option>
-                        <option value="singles">Giải Đánh Đơn (1 người/đội)</option>
-                    </select>
-
-                    <select id="bracketPlayerCount" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-bold focus:outline-none">
-                        <option value="4">4 Đội / VĐV (Bán kết -> Chung kết)</option>
-                        <option value="8" selected>8 Đội / VĐV (Tứ kết -> Bán kết -> Chung kết)</option>
-                    </select>
-
-                    <button id="setupBracketBtn" onclick="generateNewBracketModal()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs sm:text-sm shadow-md shadow-amber-500/20 transition flex items-center gap-2">
+                    <button id="setupBracketBtn" onclick="generateNewBracketModal()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-amber-500/20 transition flex items-center gap-2">
                         <i class="fa-solid fa-diagram-project"></i> Tạo Sơ Đồ Giải Mới
                     </button>
                 </div>
@@ -336,7 +325,6 @@
         </div>
     </footer>
 
-
     <!-- 1. ADMIN LOGIN MODAL -->
     <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none modal-backdrop">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-5 sm:p-6 shadow-2xl relative transition-all duration-300 scale-95 modal-content max-h-[92vh] overflow-y-auto my-auto">
@@ -346,7 +334,7 @@
                     <i class="fa-solid fa-user-shield text-lime-700 text-2xl"></i>
                 </div>
                 <h3 class="text-lg sm:text-xl font-black text-slate-900">Xác Thực Quản Trị Viên</h3>
-                <p class="text-xs text-slate-500 font-medium mt-1">Nhập mật khẩu Admin và nhấn ENTER / Nhập trên bàn phím điện thoại</p>
+                <p class="text-xs text-slate-500 font-medium mt-1">Mật khẩu mặc định: <span class="font-mono text-lime-700 font-bold">xxxx</span></p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div class="relative">
@@ -425,7 +413,7 @@
                 <p class="text-xs text-slate-500 font-medium mt-0.5">Di chuyển, xoay và thu phóng khung cắt vuông cho vừa chuẩn gương mặt</p>
             </div>
 
-            <!-- Cropper Canvas Container with Loading Overlay -->
+            <!-- Cropper Canvas Container -->
             <div id="cropperWrapper" class="relative w-full h-64 sm:h-80 bg-slate-900 rounded-2xl overflow-hidden mb-4 flex items-center justify-center border border-slate-800">
                 <div id="cropperLoadingSpinner" class="absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-2 text-lime-400">
                     <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
@@ -465,7 +453,7 @@
         </div>
     </div>
 
-    <!-- 4. MEMBER AUTH MODAL (LOGIN & REGISTER WITH INTEGRATED IMAGE CROPPER) -->
+    <!-- 4. MEMBER AUTH MODAL -->
     <div id="userAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="toggleUserAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -494,9 +482,8 @@
                 </button>
             </form>
 
-            <!-- REGISTER FORM WITH IMAGE UPLOAD & CROPPER -->
+            <!-- REGISTER FORM -->
             <form id="memberRegisterForm" onsubmit="handleMemberRegister(event)" class="space-y-4 hidden">
-                <!-- Image Upload & Crop Area -->
                 <div class="space-y-1.5">
                     <label class="block text-xs font-extrabold text-slate-600">Ảnh Đại Diện Thành Viên *</label>
                     <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
@@ -566,7 +553,7 @@
         </div>
     </div>
 
-    <!-- 5. ADD/EDIT MEMBER MODAL (ADMIN / PROFILE EDIT) -->
+    <!-- 5. ADD/EDIT MEMBER MODAL -->
     <div id="memberModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button onclick="closeMemberModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -665,9 +652,187 @@
         </div>
     </div>
 
+    <!-- 7. CUSTOM CONFIRMATION MODAL (NO BROWSER CONFIRM) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl text-center space-y-4">
+            <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto text-amber-600 text-xl border border-amber-300">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h4 id="confirmModalTitle" class="text-lg font-black text-slate-900">Xác nhận hành động</h4>
+                <p id="confirmModalMsg" class="text-xs text-slate-500 mt-1">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button id="confirmModalCancelBtn" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition">Hủy</button>
+                <button id="confirmModalOkBtn" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2.5 rounded-xl text-xs transition shadow-md shadow-lime-500/20">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        /* ================= CROPPER FUNCTIONS (OPTIMIZED FOR SMOOTHNESS & SPEED) ================= */
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'ecohome-pickleball-club';
+        const ADMIN_PASSWORD_HASH = "215151365";
+
+        let app, db, auth;
+        let isAuthReady = false;
+        let membersColRef, bracketDocRef, configDocRef;
+
+        let membersData = [
+            { id: "101", name: "Trần Minh Hoàng", phone: "0905111222", rating: 4.2, gender: "Nam", hand: "Tay Phải", position: "Cả Hai Bên", role: "Ban Quản Lý", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Hoang" },
+            { id: "102", name: "Nguyễn Thị Phương", phone: "0905222333", rating: 3.5, gender: "Nữ", hand: "Tay Phải", position: "Bên Phải (Right)", role: "Thành viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Phuong" },
+            { id: "103", name: "Lê Quốc Bảo", phone: "0905333444", rating: 3.8, gender: "Nam", hand: "Tay Trái", position: "Bên Trái (Left)", role: "Thành viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Bao" },
+            { id: "104", name: "Phạm Hải Yến", phone: "0905444555", rating: 3.2, gender: "Nữ", hand: "Tay Phải", position: "Cả Hai Bên", role: "Thành viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Yen" },
+            { id: "105", name: "Vũ Đức Thắng", phone: "0905555666", rating: 4.5, gender: "Nam", hand: "Tay Phải", position: "Bên Trái (Left)", role: "Huấn Luận Viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Thang" },
+            { id: "106", name: "Đặng Thu Hà", phone: "0905666777", rating: 3.0, gender: "Nữ", hand: "Tay Phải", position: "Bên Phải (Right)", role: "Thành viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Ha" },
+            { id: "107", name: "Hoàng Văn Tuấn", phone: "0905777888", rating: 3.6, gender: "Nam", hand: "Tay Phải", position: "Cả Hai Bên", role: "Thành viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=Tuan" },
+            { id: "108", name: "Bùi Mai Anh", phone: "0905888999", rating: 3.1, gender: "Nữ", hand: "Tay Trái", position: "Bên Phải (Right)", role: "Thành viên", avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=MaiAnh" }
+        ];
+
+        let tournamentBracket = {
+            playerCount: 8,
+            rounds: [
+                {
+                    roundName: "Vòng Tứ Kết",
+                    matches: [
+                        { id: 101, court: "Sân Ecohome 1", p1: "Trần Minh Hoàng", p2: "Nguyễn Thị Phương", score1: 11, score2: 6, winner: "Trần Minh Hoàng" },
+                        { id: 102, court: "Sân Ecohome 2", p1: "Lê Quốc Bảo", p2: "Phạm Hải Yến", score1: 11, score2: 8, winner: "Lê Quốc Bảo" },
+                        { id: 103, court: "Sân Ecohome 3", p1: "Vũ Đức Thắng", p2: "Đặng Thu Hà", score1: 11, score2: 4, winner: "Vũ Đức Thắng" },
+                        { id: 104, court: "Sân Ecohome 4", p1: "Hoàng Văn Tuấn", p2: "Bùi Mai Anh", score1: 11, score2: 9, winner: "Hoàng Văn Tuấn" }
+                    ]
+                },
+                {
+                    roundName: "Vòng Bán Kết",
+                    matches: [
+                        { id: 201, court: "Sân Ecohome 1", p1: "Trần Minh Hoàng", p2: "Lê Quốc Bảo", score1: null, score2: null, winner: null },
+                        { id: 202, court: "Sân Ecohome 2", p1: "Vũ Đức Thắng", p2: "Hoàng Văn Tuấn", score1: null, score2: null, winner: null }
+                    ]
+                },
+                {
+                    roundName: "Trận Chung Kết",
+                    matches: [
+                        { id: 301, court: "Sân Chung Kết", p1: "---", p2: "---", score1: null, score2: null, winner: null }
+                    ]
+                }
+            ],
+            champion: null
+        };
+
+        let clubLogoUrl = "";
+        let isAdminLoggedIn = false;
+        let currentLoggedUser = null;
+        let cropperInstance = null;
+        let activeCropTarget = 'reg';
+        let tempLogoDataUrl = "";
+
+        function customConfirm(title, message, onOk) {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmModalTitle').innerText = title;
+            document.getElementById('confirmModalMsg').innerText = message;
+            
+            const okBtn = document.getElementById('confirmModalOkBtn');
+            const cancelBtn = document.getElementById('confirmModalCancelBtn');
+            
+            const newOk = okBtn.cloneNode(true);
+            const newCancel = cancelBtn.cloneNode(true);
+            
+            okBtn.parentNode.replaceChild(newOk, okBtn);
+            cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+            modal.classList.remove('hidden');
+
+            newOk.onclick = () => {
+                modal.classList.add('hidden');
+                if (onOk) onOk();
+            };
+            newCancel.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
+
+        async function initFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    app = initializeApp(firebaseConfig);
+                    auth = getAuth(app);
+                    db = getFirestore(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    isAuthReady = true;
+
+                    membersColRef = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+                    bracketDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'bracket', 'current');
+                    configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'general');
+
+                    // Real-time Members Sync
+                    onSnapshot(membersColRef, (snapshot) => {
+                        if (!snapshot.empty) {
+                            const cloudMembers = [];
+                            snapshot.forEach(doc => cloudMembers.push(doc.data()));
+                            membersData = cloudMembers;
+                            renderMembers();
+                            if (document.getElementById('social-section') && !document.getElementById('social-section').classList.contains('hidden')) {
+                                renderSocialChecklist();
+                            }
+                        }
+                    }, (err) => console.error("Firestore Members error:", err));
+
+                    // Real-time Bracket Sync
+                    onSnapshot(bracketDocRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            tournamentBracket = docSnap.data();
+                            renderBracket();
+                        }
+                    }, (err) => console.error("Firestore Bracket error:", err));
+
+                    // Real-time Club Config Sync
+                    onSnapshot(configDocRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const conf = docSnap.data();
+                            if (conf.logoUrl) {
+                                clubLogoUrl = conf.logoUrl;
+                                renderHeaderLogo();
+                            }
+                        }
+                    }, (err) => console.error("Firestore Config error:", err));
+                }
+            } catch (err) {
+                console.warn("Firebase fallback mode activated:", err);
+            }
+
+            // Load saved user session
+            const savedSession = sessionStorage.getItem('ecohome_user_session');
+            if (savedSession) {
+                try {
+                    currentLoggedUser = JSON.parse(savedSession);
+                } catch(e) {}
+            }
+
+            renderHeaderLogo();
+            renderHeaderUserBadge();
+            renderMembers();
+            renderBracket();
+        }
+
+        function renderHeaderLogo() {
+            const container = document.getElementById('clubLogoContent');
+            if (!container) return;
+            if (clubLogoUrl) {
+                container.innerHTML = `<img src="${clubLogoUrl}" class="w-full h-full object-cover">`;
+            } else {
+                container.innerHTML = `<i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl animate-pulse"></i>`;
+            }
+        }
+
         function handleRegFileSelect(e) {
             const file = e.target.files && e.target.files[0];
             if (file) {
@@ -699,7 +864,6 @@
             if (spinner) spinner.classList.remove('hidden');
 
             try {
-                // Pre-downscale huge camera photos offscreen to ensure 60fps smooth touch cropping on mobile
                 const imageBitmap = await createImageBitmap(file);
                 const MAX_DIM = 1200;
                 let width = imageBitmap.width;
@@ -810,7 +974,6 @@
             }
         }
 
-        /* ================= LOGO UPLOAD MANAGEMENT ================= */
         function openLogoModal() {
             tempLogoDataUrl = clubLogoUrl || "";
             const modal = document.getElementById('logoModal');
@@ -914,7 +1077,6 @@
             }
         }
 
-        /* ================= MODALS & UI HELPERS ================= */
         function toggleModalAnimation(modalId, show) {
             const modal = document.getElementById(modalId);
             if (!modal) return;
@@ -951,35 +1113,6 @@
                 icon.classList.add('fa-eye');
             }
         }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const adminModal = document.getElementById('adminModal');
-                if (adminModal && !adminModal.classList.contains('pointer-events-none')) {
-                    toggleModalAnimation('adminModal', false);
-                }
-                const cropModal = document.getElementById('cropModal');
-                if (cropModal && !cropModal.classList.contains('hidden')) {
-                    closeCropperModal();
-                }
-                const logoModal = document.getElementById('logoModal');
-                if (logoModal && !logoModal.classList.contains('hidden')) {
-                    closeLogoModal();
-                }
-                const userAuthModal = document.getElementById('userAuthModal');
-                if (userAuthModal && !userAuthModal.classList.contains('hidden')) {
-                    userAuthModal.classList.add('hidden');
-                }
-                const memberModal = document.getElementById('memberModal');
-                if (memberModal && !memberModal.classList.contains('hidden')) {
-                    closeMemberModal();
-                }
-                const scoreModal = document.getElementById('scoreModal');
-                if (scoreModal && !scoreModal.classList.contains('hidden')) {
-                    closeScoreModal();
-                }
-            }
-        });
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -1032,7 +1165,6 @@
                     const isOpening = modal.classList.contains('pointer-events-none');
                     toggleModalAnimation('adminModal', isOpening);
                     if (isOpening) {
-                        if (navigator.vibrate) navigator.vibrate(20);
                         setTimeout(() => {
                             const input = document.getElementById('adminPasswordInput');
                             if (input) input.focus();
@@ -1046,7 +1178,6 @@
             e.preventDefault();
             const input = document.getElementById('adminPasswordInput');
             const passwordVal = input ? input.value : '';
-            
             if (input) input.blur();
 
             if (passwordVal === ADMIN_PASSWORD_HASH) {
@@ -1054,14 +1185,10 @@
                 updateAdminUI();
                 toggleModalAnimation('adminModal', false);
                 if (input) input.value = '';
-                if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
                 showToast("Đăng nhập Admin thành công!");
             } else {
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 showToast("Sai mật khẩu Admin!", "error");
-                if (input) {
-                    setTimeout(() => input.focus(), 300);
-                }
+                if (input) setTimeout(() => input.focus(), 300);
             }
         }
 
@@ -1216,6 +1343,8 @@
 
             if (isAuthReady) {
                 await setDoc(doc(membersColRef, newId), newMember);
+            } else {
+                membersData.push(newMember);
             }
             currentLoggedUser = newMember;
             sessionStorage.setItem('ecohome_user_session', JSON.stringify(currentLoggedUser));
@@ -1330,6 +1459,11 @@
 
             if (isAuthReady) {
                 await setDoc(doc(membersColRef, id.toString()), memberObj);
+            } else {
+                const idx = membersData.findIndex(m => m.id.toString() === id.toString());
+                if (idx >= 0) membersData[idx] = memberObj;
+                else membersData.push(memberObj);
+                renderMembers();
             }
 
             showToast("Đã lưu thông tin thành viên!");
@@ -1341,13 +1475,16 @@
             if (member) openMemberModal(member);
         }
 
-        async function deleteMember(id) {
-            if (confirm("Bạn có chắc chắn muốn xóa thành viên này?")) {
+        function deleteMember(id) {
+            customConfirm("Xóa thành viên", "Bạn có chắc chắn muốn xóa thành viên này khỏi danh sách CLB?", async () => {
                 if (isAuthReady) {
                     await deleteDoc(doc(membersColRef, id.toString()));
+                } else {
+                    membersData = membersData.filter(m => m.id.toString() !== id.toString());
+                    renderMembers();
                 }
                 showToast("Đã xóa thành viên", "info");
-            }
+            });
         }
 
         function renderSocialChecklist() {
@@ -1630,19 +1767,21 @@
 
             if (isAuthReady) {
                 await setDoc(bracketDocRef, tournamentBracket);
+            } else {
+                renderBracket();
             }
 
             closeScoreModal();
             showToast(`Đã cập nhật chiến thắng cho ${match.winner}!`);
         }
 
-        async function generateNewBracketModal() {
+        function generateNewBracketModal() {
             if (membersData.length < 4) {
                 showToast("Cần ít nhất 4 thành viên để tạo sơ đồ thi đấu!", "error");
                 return;
             }
 
-            if (confirm("Bạn có muốn tạo lại Sơ đồ giải đấu mới ngẫu nhiên từ danh sách thành viên hiện tại?")) {
+            customConfirm("Tạo Sơ Đồ Giải Mới", "Bạn có muốn tạo lại Sơ đồ giải đấu mới ngẫu nhiên từ danh sách thành viên hiện tại?", async () => {
                 const shuffled = [...membersData].sort(() => Math.random() - 0.5);
                 
                 tournamentBracket = {
@@ -1676,9 +1815,11 @@
 
                 if (isAuthReady) {
                     await setDoc(bracketDocRef, tournamentBracket);
+                } else {
+                    renderBracket();
                 }
                 showToast("Đã khởi tạo Giải đấu mới thành công!");
-            }
+            });
         }
 
         window.switchTab = switchTab;
@@ -1712,16 +1853,18 @@
         window.saveMatchScore = saveMatchScore;
         window.generateNewBracketModal = generateNewBracketModal;
 
-        // Image Cropper Bindings
         window.handleRegFileSelect = handleRegFileSelect;
         window.handleMemberFileSelect = handleMemberFileSelect;
-        window.openCropperModal = openCropperModal;
         window.closeCropperModal = closeCropperModal;
         window.rotateCropper = rotateCropper;
         window.zoomCropper = zoomCropper;
         window.resetCropper = resetCropper;
         window.applyCrop = applyCrop;
         window.updateRegAvatarFromUrl = updateRegAvatarFromUrl;
+
+        window.addEventListener('load', () => {
+            initFirebase();
+        });
     </script>
 </body>
 </html>
