@@ -339,7 +339,7 @@
                     </span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Thể Thức Giải Đấu</label>
                         <select id="bracketFormatType" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
@@ -358,6 +358,14 @@
                     </div>
 
                     <div>
+                        <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Hướng Hướng Hiển Thị Sơ Đồ</label>
+                        <select id="bracketOrientation" onchange="changeBracketOrientation(this.value)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-500">
+                            <option value="vertical" selected>Từ Trên Xuống (Dọc - Hiện Đầy Đủ Tên)</option>
+                            <option value="horizontal">Từ Trái Sang Phải (Ngang)</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block text-xs font-extrabold text-slate-700 uppercase mb-1">Tùy Chọn Hiển Thị Sơ Đồ</label>
                         <button onclick="toggleBracketDetails()" id="btnToggleDetails" class="w-full bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold px-3 py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
                             <i class="fa-solid fa-eye text-sky-600"></i>
@@ -367,9 +375,9 @@
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-200/90 rounded-3xl p-6 overflow-x-auto min-h-[520px] shadow-sm">
-                <div id="bracketTreeContainer" class="flex items-center min-w-[850px] justify-between gap-12 py-6">
-                    <!-- Dynamic Bracket Columns -->
+            <div class="bg-white border border-slate-200/90 rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden">
+                <div id="bracketTreeContainer" class="space-y-8 py-2">
+                    <!-- Dynamic Bracket Tree Top to Bottom -->
                 </div>
             </div>
         </section>
@@ -1737,6 +1745,11 @@
             const defaultRoundTitles = ["Vòng 1", "Vòng Tứ Kết", "Vòng Bán Kết", "Trận Chung Kết"];
             const isDoubles = (tournamentBracket.bracketType || 'doubles') === 'doubles';
             const hideDetails = tournamentBracket.hideDetails || false;
+            const orientation = tournamentBracket.orientation || 'vertical';
+
+            // Sync orientation dropdown in admin panel if present
+            const orientSelect = document.getElementById('bracketOrientation');
+            if (orientSelect) orientSelect.value = orientation;
 
             // Update status badge if available
             const statusBadge = document.getElementById('bracketStatusBadge');
@@ -1747,72 +1760,193 @@
                     : "bg-sky-100 text-sky-800 border border-sky-300 text-[10px] font-black px-2.5 py-1 rounded-full uppercase";
             }
 
-            (tournamentBracket.rounds || []).forEach((roundObj, roundIdx) => {
-                const column = document.createElement('div');
-                column.className = "flex flex-col justify-around h-full space-y-8 flex-1 min-w-[250px]";
+            const rounds = tournamentBracket.rounds || [];
 
-                const roundHeader = document.createElement('h4');
-                roundHeader.className = "text-center text-xs font-black text-slate-600 uppercase tracking-wider mb-4 bg-slate-100 py-2 rounded-xl border border-slate-200 flex items-center justify-center gap-1.5";
-                roundHeader.innerHTML = `
-                    <i class="fa-solid ${isDoubles ? 'fa-user-group text-amber-600' : 'fa-user text-sky-600'} text-xs"></i>
-                    <span>${roundObj.roundName || defaultRoundTitles[roundIdx] || `Vòng ${roundIdx + 1}`}</span>
-                `;
-                column.appendChild(roundHeader);
+            /* =========================================================
+               LAYOUT MODE 1: VERTICAL (TOP-TO-BOTTOM) - FULL NAME DISPLAY
+               ========================================================= */
+            if (orientation === 'vertical') {
+                container.className = "flex flex-col gap-8 py-2 w-full";
 
-                const roundMatches = roundObj.matches || [];
-                roundMatches.forEach((match, matchIdx) => {
-                    const matchCard = document.createElement('div');
-                    matchCard.className = `bracket-match bg-white border border-slate-200/90 rounded-2xl p-3.5 relative shadow-sm ${isAdminLoggedIn ? 'cursor-pointer hover:border-amber-500' : ''}`;
-                    
-                    if (isAdminLoggedIn) {
-                        matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
-                    }
+                rounds.forEach((roundObj, roundIdx) => {
+                    const roundSection = document.createElement('div');
+                    roundSection.className = "space-y-4 w-full";
 
-                    const isP1Winner = match.winner && match.winner === match.p1;
-                    const isP2Winner = match.winner && match.winner === match.p2;
-
-                    matchCard.innerHTML = `
-                        ${!hideDetails ? `
-                        <div class="text-[10px] text-sky-700 font-extrabold mb-2 flex justify-between items-center border-b border-slate-100 pb-1.5 uppercase">
-                            <span><i class="fa-solid fa-location-dot text-lime-600 mr-1"></i>${match.court || 'Sân thi đấu'}</span>
-                            <span class="text-[9px] ${isDoubles ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'} px-1.5 py-0.5 rounded font-black">${isDoubles ? 'Đôi' : 'Đơn'}</span>
-                        </div>
-                        ` : ''}
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between items-center p-2 rounded-xl ${isP1Winner ? 'bg-lime-100 border border-lime-300' : 'bg-slate-50'}">
-                                <span class="text-xs font-bold ${isP1Winner ? 'text-lime-900 font-black' : 'text-slate-700'} truncate max-w-[170px]" title="${match.p1 || '---'}">
-                                    ${match.p1 || '---'}
-                                </span>
-                                <span class="text-xs font-mono font-black ${isP1Winner ? 'text-lime-800' : 'text-slate-400'} ml-2">
-                                    ${match.score1 !== null && match.score1 !== undefined ? match.score1 : '-'}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-center p-2 rounded-xl ${isP2Winner ? 'bg-lime-100 border border-lime-300' : 'bg-slate-50'}">
-                                <span class="text-xs font-bold ${isP2Winner ? 'text-lime-900 font-black' : 'text-slate-700'} truncate max-w-[170px]" title="${match.p2 || '---'}">
-                                    ${match.p2 || '---'}
-                                </span>
-                                <span class="text-xs font-mono font-black ${isP2Winner ? 'text-lime-800' : 'text-slate-400'} ml-2">
-                                    ${match.score2 !== null && match.score2 !== undefined ? match.score2 : '-'}
-                                </span>
-                            </div>
-                        </div>
+                    // Round Header
+                    const roundHeader = document.createElement('div');
+                    roundHeader.className = "flex items-center gap-3 justify-center";
+                    roundHeader.innerHTML = `
+                        <div class="h-0.5 bg-slate-200 flex-1"></div>
+                        <span class="bg-slate-900 text-lime-400 text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-2">
+                            <i class="fa-solid ${isDoubles ? 'fa-user-group text-amber-400' : 'fa-user text-sky-400'} text-xs"></i>
+                            <span>${roundObj.roundName || defaultRoundTitles[roundIdx] || `Vòng ${roundIdx + 1}`}</span>
+                        </span>
+                        <div class="h-0.5 bg-slate-200 flex-1"></div>
                     `;
-                    column.appendChild(matchCard);
+                    roundSection.appendChild(roundHeader);
+
+                    // Responsive Grid according to match count in this round
+                    const matchCount = roundObj.matches?.length || 1;
+                    let gridColsClass = "grid-cols-1";
+                    if (matchCount === 2) gridColsClass = "grid-cols-1 md:grid-cols-2";
+                    else if (matchCount >= 4) gridColsClass = "grid-cols-1 md:grid-cols-2 lg:grid-cols-4";
+
+                    const matchesGrid = document.createElement('div');
+                    matchesGrid.className = `grid ${gridColsClass} gap-4 w-full`;
+
+                    (roundObj.matches || []).forEach((match, matchIdx) => {
+                        const matchCard = document.createElement('div');
+                        matchCard.className = `bracket-match bg-slate-50 border-2 border-slate-200/90 rounded-2xl p-4 relative shadow-sm hover:border-lime-500 transition-all ${isAdminLoggedIn ? 'cursor-pointer' : ''}`;
+                        
+                        if (isAdminLoggedIn) {
+                            matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
+                        }
+
+                        const isP1Winner = match.winner && match.winner === match.p1;
+                        const isP2Winner = match.winner && match.winner === match.p2;
+
+                        matchCard.innerHTML = `
+                            ${!hideDetails ? `
+                            <div class="text-[10px] text-sky-700 font-extrabold mb-2.5 flex justify-between items-center border-b border-slate-200/80 pb-2 uppercase">
+                                <span><i class="fa-solid fa-location-dot text-lime-600 mr-1"></i>${match.court || 'Sân thi đấu'}</span>
+                                <span class="text-[9px] ${isDoubles ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'} px-2 py-0.5 rounded-md font-black">${isDoubles ? 'Trận Đôi' : 'Trận Đơn'}</span>
+                            </div>
+                            ` : ''}
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center p-2.5 rounded-xl transition ${isP1Winner ? 'bg-lime-100 border-2 border-lime-400 shadow-sm' : 'bg-white border border-slate-200'}">
+                                    <span class="text-xs sm:text-sm font-black ${isP1Winner ? 'text-lime-950' : 'text-slate-800'} break-words whitespace-normal flex-1 pr-2">
+                                        ${match.p1 || '---'}
+                                    </span>
+                                    <span class="text-sm sm:text-base font-mono font-black ${isP1Winner ? 'text-lime-700 bg-white px-2.5 py-0.5 rounded-lg border border-lime-300 shadow-inner' : 'text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg'}">
+                                        ${match.score1 !== null && match.score1 !== undefined ? match.score1 : '-'}
+                                    </span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center p-2.5 rounded-xl transition ${isP2Winner ? 'bg-lime-100 border-2 border-lime-400 shadow-sm' : 'bg-white border border-slate-200'}">
+                                    <span class="text-xs sm:text-sm font-black ${isP2Winner ? 'text-lime-950' : 'text-slate-800'} break-words whitespace-normal flex-1 pr-2">
+                                        ${match.p2 || '---'}
+                                    </span>
+                                    <span class="text-sm sm:text-base font-mono font-black ${isP2Winner ? 'text-lime-700 bg-white px-2.5 py-0.5 rounded-lg border border-lime-300 shadow-inner' : 'text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg'}">
+                                        ${match.score2 !== null && match.score2 !== undefined ? match.score2 : '-'}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                        matchesGrid.appendChild(matchCard);
+                    });
+
+                    roundSection.appendChild(matchesGrid);
+                    container.appendChild(roundSection);
+
+                    // Downward Connecting Arrow between rounds
+                    if (roundIdx < rounds.length - 1) {
+                        const arrowDiv = document.createElement('div');
+                        arrowDiv.className = "flex justify-center my-1";
+                        arrowDiv.innerHTML = `
+                            <div class="bg-gradient-to-b from-slate-100 to-lime-100 text-lime-700 w-8 h-8 rounded-full border border-lime-300 flex items-center justify-center shadow-xs">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </div>
+                        `;
+                        container.appendChild(arrowDiv);
+                    }
                 });
 
-                container.appendChild(column);
-            });
+                // Top-to-Bottom Grand Champion Banner
+                const champDiv = document.createElement('div');
+                champDiv.className = "pt-4 flex justify-center w-full";
+                champDiv.innerHTML = `
+                    <div class="text-center p-6 bg-gradient-to-b from-amber-100 via-amber-50 to-white border-2 border-amber-400 rounded-3xl w-full max-w-xl shadow-lg relative overflow-hidden">
+                        <div class="absolute -top-6 -right-6 text-amber-200/40 text-8xl pointer-events-none"><i class="fa-solid fa-trophy"></i></div>
+                        <i class="fa-solid fa-trophy text-5xl text-amber-500 mb-2 animate-bounce"></i>
+                        <h4 class="text-xs font-black text-amber-900 uppercase tracking-widest mb-1.5">NHÀ VO DỊCH QUÁN QUÂN (${isDoubles ? 'CẶP ĐÔI' : 'ĐƠN'})</h4>
+                        <p class="text-lg sm:text-2xl font-black text-slate-900 whitespace-normal break-words leading-snug px-2" title="${tournamentBracket.champion || 'Chưa xác định'}">
+                            ${tournamentBracket.champion || 'Chưa xác định'}
+                        </p>
+                    </div>
+                `;
+                container.appendChild(champDiv);
 
-            const champCol = document.createElement('div');
-            champCol.className = "flex flex-col items-center justify-center min-w-[200px]";
-            champCol.innerHTML = `
-                <div class="text-center p-6 bg-gradient-to-b from-amber-100 via-amber-50 to-white border-2 border-amber-300 rounded-3xl w-full shadow-md">
-                    <i class="fa-solid fa-trophy text-5xl text-amber-500 mb-2 animate-bounce"></i>
-                    <h4 class="text-xs font-black text-amber-800 uppercase tracking-widest mb-1">QUÁN QUÂN (${isDoubles ? 'CẶP ĐÔI' : 'ĐƠN'})</h4>
-                    <p class="text-base font-black text-slate-900 truncate" title="${tournamentBracket.champion || 'Chưa xác định'}">${tournamentBracket.champion || 'Chưa xác định'}</p>
-                </div>
-            `;
-            container.appendChild(champCol);
+            /* =========================================================
+               LAYOUT MODE 2: HORIZONTAL (LEFT-TO-RIGHT)
+               ========================================================= */
+            } else {
+                container.className = "flex items-center min-w-[850px] justify-between gap-8 py-4 overflow-x-auto";
+
+                rounds.forEach((roundObj, roundIdx) => {
+                    const column = document.createElement('div');
+                    column.className = "flex flex-col justify-around h-full space-y-8 flex-1 min-w-[280px]";
+
+                    const roundHeader = document.createElement('h4');
+                    roundHeader.className = "text-center text-xs font-black text-slate-600 uppercase tracking-wider mb-4 bg-slate-100 py-2 rounded-xl border border-slate-200 flex items-center justify-center gap-1.5";
+                    roundHeader.innerHTML = `
+                        <i class="fa-solid ${isDoubles ? 'fa-user-group text-amber-600' : 'fa-user text-sky-600'} text-xs"></i>
+                        <span>${roundObj.roundName || defaultRoundTitles[roundIdx] || `Vòng ${roundIdx + 1}`}</span>
+                    `;
+                    column.appendChild(roundHeader);
+
+                    (roundObj.matches || []).forEach((match, matchIdx) => {
+                        const matchCard = document.createElement('div');
+                        matchCard.className = `bracket-match bg-white border-2 border-slate-200/90 rounded-2xl p-3.5 relative shadow-sm ${isAdminLoggedIn ? 'cursor-pointer hover:border-amber-500' : ''}`;
+                        
+                        if (isAdminLoggedIn) {
+                            matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
+                        }
+
+                        const isP1Winner = match.winner && match.winner === match.p1;
+                        const isP2Winner = match.winner && match.winner === match.p2;
+
+                        matchCard.innerHTML = `
+                            ${!hideDetails ? `
+                            <div class="text-[10px] text-sky-700 font-extrabold mb-2 flex justify-between items-center border-b border-slate-100 pb-1.5 uppercase">
+                                <span><i class="fa-solid fa-location-dot text-lime-600 mr-1"></i>${match.court || 'Sân thi đấu'}</span>
+                                <span class="text-[9px] ${isDoubles ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'} px-1.5 py-0.5 rounded font-black">${isDoubles ? 'Đôi' : 'Đơn'}</span>
+                            </div>
+                            ` : ''}
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center p-2 rounded-xl ${isP1Winner ? 'bg-lime-100 border border-lime-300' : 'bg-slate-50'}">
+                                    <span class="text-xs font-black ${isP1Winner ? 'text-lime-900' : 'text-slate-700'} break-words whitespace-normal pr-2">
+                                        ${match.p1 || '---'}
+                                    </span>
+                                    <span class="text-xs font-mono font-black ${isP1Winner ? 'text-lime-800' : 'text-slate-400'}">
+                                        ${match.score1 !== null && match.score1 !== undefined ? match.score1 : '-'}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center p-2 rounded-xl ${isP2Winner ? 'bg-lime-100 border border-lime-300' : 'bg-slate-50'}">
+                                    <span class="text-xs font-black ${isP2Winner ? 'text-lime-900' : 'text-slate-700'} break-words whitespace-normal pr-2">
+                                        ${match.p2 || '---'}
+                                    </span>
+                                    <span class="text-xs font-mono font-black ${isP2Winner ? 'text-lime-800' : 'text-slate-400'}">
+                                        ${match.score2 !== null && match.score2 !== undefined ? match.score2 : '-'}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                        column.appendChild(matchCard);
+                    });
+
+                    container.appendChild(column);
+                });
+
+                const champCol = document.createElement('div');
+                champCol.className = "flex flex-col items-center justify-center min-w-[240px]";
+                champCol.innerHTML = `
+                    <div class="text-center p-6 bg-gradient-to-b from-amber-100 via-amber-50 to-white border-2 border-amber-300 rounded-3xl w-full shadow-md">
+                        <i class="fa-solid fa-trophy text-5xl text-amber-500 mb-2 animate-bounce"></i>
+                        <h4 class="text-xs font-black text-amber-800 uppercase tracking-widest mb-1">QUÁN QUÂN (${isDoubles ? 'CẶP ĐÔI' : 'ĐƠN'})</h4>
+                        <p class="text-base font-black text-slate-900 break-words whitespace-normal" title="${tournamentBracket.champion || 'Chưa xác định'}">${tournamentBracket.champion || 'Chưa xác định'}</p>
+                    </div>
+                `;
+                container.appendChild(champCol);
+            }
+        }
+
+        function changeBracketOrientation(orientationVal) {
+            tournamentBracket.orientation = orientationVal;
+            if (isAuthReady) {
+                setDoc(bracketDocRef, tournamentBracket, { merge: true }).catch(err => console.error(err));
+            }
+            renderBracket();
+            showToast(orientationVal === 'vertical' ? "Đã chuyển sang sơ đồ từ trên xuống (Hiện đầy đủ tên)" : "Đã chuyển sang sơ đồ từ trái sang phải");
         }
 
         function toggleBracketConfigPanel() {
@@ -2476,6 +2610,7 @@
         window.renderSocialMatchResults = renderSocialMatchResults;
         window.clearSocialDrawData = clearSocialDrawData;
         window.copySocialDrawToClipboard = copySocialDrawToClipboard;
+        window.changeBracketOrientation = changeBracketOrientation;
 
         window.addEventListener('load', () => {
             initFirebase();
