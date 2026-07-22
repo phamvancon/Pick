@@ -36,9 +36,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Cropper.js CSS & JS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     
     <style>
         body {
@@ -70,19 +67,6 @@
             box-shadow: 0 10px 25px -5px rgba(132, 204, 22, 0.25);
         }
 
-        /* Cropper custom styling */
-        .cropper-container {
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-
-        /* Studio Filters */
-        .filter-lime canvas, .filter-lime img { filter: contrast(110%) brightness(105%) saturate(120%) hue-rotate(-15deg); }
-        .filter-court canvas, .filter-court img { filter: contrast(115%) brightness(102%) saturate(130%) hue-rotate(180deg); }
-        .filter-vivid canvas, .filter-vivid img { filter: contrast(125%) brightness(108%) saturate(150%); }
-        .filter-gold canvas, .filter-gold img { filter: contrast(105%) sepia(40%) saturate(140%) hue-rotate(5deg); }
-        .filter-bw canvas, .filter-bw img { filter: grayscale(100%) contrast(120%); }
-
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 6px; }
@@ -112,7 +96,7 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs & Auth Buttons -->
+                <!-- Navigation Tabs & Auth -->
                 <div class="flex items-center gap-2 sm:gap-3">
                     <nav class="hidden md:flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80">
                         <button onclick="switchTab('members')" id="tab-members" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">
@@ -132,7 +116,7 @@
                         <span class="hidden sm:inline">Đổi Logo</span>
                     </button>
 
-                    <!-- Member Auth Header Container -->
+                    <!-- User Header Badge / Auth -->
                     <div id="userProfileHeaderContainer" class="flex items-center gap-2">
                         <button id="userAuthBtn" onclick="toggleUserAuthModal()" class="flex items-center gap-2 bg-lime-500/10 hover:bg-lime-500/20 text-lime-700 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-lime-500/30 transition shadow-sm">
                             <i class="fa-solid fa-user-plus"></i>
@@ -140,7 +124,7 @@
                         </button>
                     </div>
 
-                    <!-- Admin Lock/Unlock Button -->
+                    <!-- Admin Auth Button -->
                     <button id="adminBtn" onclick="toggleAdminModal()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-800 transition-all duration-150 shadow-sm touch-manipulation">
                         <i id="adminIcon" class="fa-solid fa-lock text-lime-400"></i>
                         <span id="adminText">Admin</span>
@@ -220,6 +204,12 @@
 
         <!-- ================= TAB 2: RANDOM MATCH GENERATOR ================= -->
         <section id="social-section" class="hidden space-y-6">
+            <!-- Non-Admin Notice Banner -->
+            <div id="adminOnlyNoticeBanner" class="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-xs font-bold text-amber-900 flex items-center gap-2">
+                <i class="fa-solid fa-lock text-amber-600 text-base"></i>
+                <span>Chế độ xem: Chỉ Quản Trị Viên (Admin) mới có quyền tùy chỉnh tham số và bốc thăm phân sân.</span>
+            </div>
+
             <div class="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
@@ -228,7 +218,7 @@
                         </h2>
                         <p class="text-sm text-slate-500 font-medium mt-1">Ghép cặp ngẫu nhiên theo số sân, thể thức thi đấu & xoay vòng nhiều ván cân bằng DUPR</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div id="socialDrawAdminControls" class="hidden flex items-center gap-2">
                         <button onclick="selectAllMembersForSocial(true)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Chọn tất cả</button>
                         <button onclick="selectAllMembersForSocial(false)" class="text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl border border-slate-200 transition">Bỏ chọn</button>
                         <button onclick="generateRandomSocialMatches()" class="bg-gradient-to-r from-lime-500 to-lime-400 hover:from-lime-400 hover:to-lime-300 text-slate-950 font-black px-5 py-2.5 rounded-xl text-sm shadow-md shadow-lime-500/20 transition flex items-center gap-2">
@@ -321,154 +311,6 @@
         </div>
     </footer>
 
-    <!-- SMART AVATAR STUDIO MODAL (300x400 Standard 3:4 Portrait Crop) -->
-    <div id="cropModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-3 sm:p-4 transition-all duration-300">
-        <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl p-5 sm:p-6 shadow-2xl relative flex flex-col max-h-[94vh] overflow-hidden">
-            <button onclick="closeCropperModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 w-9 h-9 flex items-center justify-center rounded-full active:bg-slate-100 transition z-20"><i class="fa-solid fa-xmark text-lg"></i></button>
-            
-            <div class="mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="bg-lime-100 text-lime-800 p-2 rounded-xl text-xs font-black"><i class="fa-solid fa-crop-simple"></i></span>
-                    <div>
-                        <h3 class="text-lg font-black text-slate-900">Xưởng Cắt & Chỉnh Ảnh Đơn Giản (300 x 400)</h3>
-                        <p class="text-xs text-slate-500 font-medium">Tỷ lệ chuẩn 3:4 dọc • Căn chỉnh nhanh gương mặt thành viên</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Studio Mode Tabs -->
-            <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 mb-3 text-xs font-bold gap-1">
-                <button type="button" id="studioTabCrop" onclick="switchStudioTab('crop')" class="flex-1 py-1.5 rounded-xl transition bg-white text-slate-900 shadow-xs flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-crop-simple text-lime-600"></i> Cắt Ảnh (3:4)
-                </button>
-                <button type="button" id="studioTabCamera" onclick="switchStudioTab('camera')" class="flex-1 py-1.5 rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-camera text-sky-600"></i> Chụp Ảnh Live
-                </button>
-                <button type="button" id="studioTabFilter" onclick="switchStudioTab('filter')" class="flex-1 py-1.5 rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-sliders text-amber-500"></i> Bộ Lọc & Khung
-                </button>
-                <button type="button" id="studioTabPresets" onclick="switchStudioTab('presets')" class="flex-1 py-1.5 rounded-xl transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-icons text-purple-600"></i> Kho Avatar
-                </button>
-            </div>
-
-            <!-- TAB 1: CROP & WORKSPACE -->
-            <div id="studioPanelCrop" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3 items-center">
-                <div id="cropperWrapper" class="md:col-span-2 relative w-full h-64 sm:h-72 bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-inner">
-                    <div id="cropperLoadingSpinner" class="absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-2 text-lime-400">
-                        <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
-                        <span class="text-xs font-bold text-slate-300">Đang tối ưu ảnh 3:4...</span>
-                    </div>
-                    <img id="cropperImg" class="max-w-full max-h-full block">
-                </div>
-
-                <!-- Live Preview Display Boxes (300x400) -->
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex flex-col items-center justify-center gap-2.5">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Xem Trước 3:4 (300x400)</span>
-                    
-                    <div class="flex items-center justify-center gap-3">
-                        <div class="text-center">
-                            <div class="w-21 h-28 rounded-2xl border-2 border-lime-500 overflow-hidden shadow-md mx-auto bg-slate-200 relative aspect-[3/4]">
-                                <div id="liveCropPreview34" class="w-full h-full overflow-hidden"></div>
-                                <div id="frameOverlayCircle" class="absolute inset-0 pointer-events-none"></div>
-                            </div>
-                            <span class="text-[9px] font-bold text-slate-500 mt-1 block">Khung Thẻ Dọc</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-200/80 text-slate-700 text-[10px] px-2.5 py-1 rounded-lg text-center font-bold flex items-center gap-1">
-                        <i class="fa-solid fa-paste text-lime-600"></i> Dán ảnh qua <code class="bg-white px-1 rounded font-mono text-slate-900">Ctrl+V</code>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 2: LIVE WEBCAM CAMERA -->
-            <div id="studioPanelCamera" class="hidden space-y-3 mb-3">
-                <div class="relative w-full h-60 bg-slate-950 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800">
-                    <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                    <div id="webcamPlaceholder" class="text-center text-slate-400 p-4">
-                        <i class="fa-solid fa-camera-retro text-4xl mb-2 text-slate-600"></i>
-                        <p class="text-xs font-bold">Chưa bật Camera. Nhấn "Bật Camera Live" bên dưới.</p>
-                    </div>
-                    <div id="cameraCountdown" class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center text-6xl font-black text-lime-400 hidden">3</div>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" onclick="startWebcam()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
-                        <i class="fa-solid fa-power-off"></i> Bật Camera Live
-                    </button>
-                    <button type="button" onclick="takeWebcamSnapshot()" class="flex-1 bg-lime-500 hover:bg-lime-400 text-slate-950 font-black py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition">
-                        <i class="fa-solid fa-circle-dot"></i> Chụp Ảnh Ngay (3s)
-                    </button>
-                </div>
-            </div>
-
-            <!-- TAB 3: FILTERS & FRAMES -->
-            <div id="studioPanelFilter" class="hidden space-y-3 mb-3 max-h-60 overflow-y-auto pr-1">
-                <div>
-                    <label class="block text-[11px] font-black text-slate-700 uppercase mb-1.5"><i class="fa-solid fa-palette text-amber-500 mr-1"></i> Bộ Lọc Màu Thể Thao:</label>
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                        <button type="button" onclick="applyFilterPreset('none')" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-extrabold text-slate-700 hover:border-lime-500 text-center">Gốc</button>
-                        <button type="button" onclick="applyFilterPreset('lime')" class="p-2 bg-lime-50 border border-lime-300 rounded-xl text-[10px] font-extrabold text-lime-900 hover:border-lime-500 text-center">Sport Lime</button>
-                        <button type="button" onclick="applyFilterPreset('court')" class="p-2 bg-sky-50 border border-sky-300 rounded-xl text-[10px] font-extrabold text-sky-900 hover:border-sky-500 text-center">Court Blue</button>
-                        <button type="button" onclick="applyFilterPreset('vivid')" class="p-2 bg-pink-50 border border-pink-300 rounded-xl text-[10px] font-extrabold text-pink-900 hover:border-pink-500 text-center">Vivid Champ</button>
-                        <button type="button" onclick="applyFilterPreset('gold')" class="p-2 bg-amber-50 border border-amber-300 rounded-xl text-[10px] font-extrabold text-amber-900 hover:border-amber-500 text-center">Golden VIP</button>
-                        <button type="button" onclick="applyFilterPreset('bw')" class="p-2 bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-extrabold text-slate-900 hover:border-slate-500 text-center">B&W Pro</button>
-                    </div>
-                </div>
-
-                <div class="pt-2 border-t border-slate-100">
-                    <label class="block text-[11px] font-black text-slate-700 uppercase mb-1.5"><i class="fa-solid fa-shield-halved text-lime-600 mr-1"></i> Khung Huy Hiệu & Viền CLB:</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        <button type="button" onclick="applyFramePreset('none')" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-700 hover:border-lime-500 text-center">Không khung</button>
-                        <button type="button" onclick="applyFramePreset('lime_ring')" class="p-2 bg-lime-100 border border-lime-400 rounded-xl text-[10px] font-bold text-lime-900 hover:border-lime-600 text-center">Ecohome Lime VIP</button>
-                        <button type="button" onclick="applyFramePreset('gold_champ')" class="p-2 bg-amber-100 border border-amber-400 rounded-xl text-[10px] font-bold text-amber-900 hover:border-amber-600 text-center">DUPR Gold</button>
-                        <button type="button" onclick="applyFramePreset('court_neon')" class="p-2 bg-sky-100 border border-sky-400 rounded-xl text-[10px] font-bold text-sky-900 hover:border-sky-600 text-center">Court Neon</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 4: PRESETS GALLERY -->
-            <div id="studioPanelPresets" class="hidden space-y-2 mb-3 max-h-60 overflow-y-auto pr-1">
-                <p class="text-[11px] font-bold text-slate-500">Chọn nhanh avatar Pickleball thể thao có sẵn:</p>
-                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="presetAvatarGrid">
-                    <!-- Dynamic Preset Avatars -->
-                </div>
-            </div>
-
-            <!-- Cropper Controls Bar -->
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 bg-slate-50 p-2 rounded-2xl border border-slate-200 text-xs">
-                <div class="flex flex-wrap items-center gap-1.5">
-                    <button type="button" onclick="rotateCropper(-90)" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center gap-1 active:scale-95 transition" title="Xoay trái 90°">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-                    <button type="button" onclick="rotateCropper(90)" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center gap-1 active:scale-95 transition" title="Xoay phải 90°">
-                        <i class="fa-solid fa-rotate-right"></i>
-                    </button>
-                    <button type="button" onclick="flipCropperX()" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center gap-1 active:scale-95 transition" title="Lật ngang">
-                        <i class="fa-solid fa-arrows-left-right"></i>
-                    </button>
-                    <button type="button" onclick="zoomCropper(0.1)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Phóng to">
-                        <i class="fa-solid fa-magnifying-glass-plus"></i>
-                    </button>
-                    <button type="button" onclick="zoomCropper(-0.1)" class="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold border border-slate-200 flex items-center justify-center active:scale-95 transition" title="Thu nhỏ">
-                        <i class="fa-solid fa-magnifying-glass-minus"></i>
-                    </button>
-                </div>
-                <button type="button" onclick="resetCropper()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-600 font-extrabold text-xs border border-slate-200 active:scale-95 transition">
-                    <i class="fa-solid fa-arrow-rotate-left mr-1"></i>Đặt lại
-                </button>
-            </div>
-
-            <!-- Cropper Actions -->
-            <div class="flex gap-3">
-                <button type="button" onclick="closeCropperModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-xs transition">Hủy bỏ</button>
-                <button type="button" onclick="applyCrop()" class="flex-1 bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black py-2.5 rounded-2xl text-xs transition shadow-md shadow-lime-500/20 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-check text-sm"></i> Áp Dụng Cắt Ảnh 3:4
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- MEMBER AUTH MODAL -->
     <div id="userAuthModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
@@ -498,28 +340,20 @@
                 </button>
             </form>
 
-            <!-- REGISTER FORM -->
+            <!-- REGISTER FORM WITH AUTO 3X4 AVATAR -->
             <form id="memberRegisterForm" onsubmit="handleMemberRegister(event)" class="space-y-4 hidden">
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-extrabold text-slate-600">Ảnh Đại Diện Thành Viên (Chuẩn 300x400) *</label>
-                    <div id="regDropzone" onclick="openAvatarStudio('reg')" class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border-2 border-dashed border-slate-300 transition hover:border-lime-500 cursor-pointer group">
-                        <div class="w-18 h-24 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm group-hover:scale-105 transition aspect-[3/4]">
-                            <img id="regAvatarPreview" src="https://placehold.co/300x400/f1f5f9/65a30d?text=300x400" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            </div>
+                    <label class="block text-xs font-extrabold text-slate-600">Ảnh Đại Diện Thành Viên (Tự Động Cân 3x4) *</label>
+                    <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <div class="w-18 h-24 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm aspect-[3/4]">
+                            <img id="regAvatarPreview" src="https://placehold.co/300x400/f1f5f9/65a30d?text=3x4" class="w-full h-full object-cover">
                         </div>
-                        <div class="flex-1 space-y-1.5" onclick="event.stopPropagation()">
-                            <div class="flex flex-wrap gap-1.5">
-                                <button type="button" onclick="openAvatarStudio('reg')" class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2 px-3 rounded-xl transition inline-flex items-center gap-1.5 shadow-sm">
-                                    <i class="fa-solid fa-crop-simple"></i> Cắt Ảnh 300x400
-                                </button>
-                                <label class="bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-800 font-bold text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
-                                    <i class="fa-solid fa-upload"></i> Chọn file
-                                    <input type="file" id="regAvatarFileInput" accept="image/*" onchange="handleRegFileSelect(event)" class="hidden">
-                                </label>
-                            </div>
-                            <p class="text-[10px] text-slate-500 font-medium">Bấm Cắt Ảnh để tự động điều chỉnh theo khung dọc 300x400 nhanh chóng</p>
+                        <div class="flex-1 space-y-2">
+                            <label class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2.5 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Ảnh 3x4 (Tự động)
+                                <input type="file" id="regAvatarFileInput" accept="image/*" onchange="autoProcessAvatar3x4(event.target.files[0], 'reg')" class="hidden">
+                            </label>
+                            <p class="text-[10px] text-slate-500 font-medium">Chọn file ảnh bất kỳ, hệ thống sẽ tự động cắt khung 3x4 chuẩn chân dung.</p>
                             <input type="text" id="regAvatar" placeholder="Hoặc dán URL đường dẫn ảnh..." oninput="updateRegAvatarFromUrl(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:border-lime-500">
                         </div>
                     </div>
@@ -586,27 +420,16 @@
 
             <form onsubmit="saveMember(event)" class="space-y-4">
                 <input type="hidden" id="memberId">
-                <div id="memberDropzone" onclick="openAvatarStudio('member')" class="flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border-2 border-dashed border-slate-300 transition hover:border-lime-500 cursor-pointer group">
-                    <div class="w-18 h-24 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm group-hover:scale-105 transition aspect-[3/4]">
-                        <img id="avatarPreview" src="https://placehold.co/300x400/f1f5f9/65a30d?text=300x400" class="w-full h-full object-cover">
-                        <div id="avatarStagedBadge" class="hidden absolute inset-0 bg-lime-950/70 text-lime-300 text-[9px] font-black flex items-center justify-center text-center p-1">
-                            Đã cắt 3:4<br>(Chờ lưu)
-                        </div>
-                        <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </div>
+                <div class="flex items-center gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <div class="w-18 h-24 rounded-2xl bg-slate-200 overflow-hidden relative flex-shrink-0 border-2 border-lime-500 shadow-sm aspect-[3/4]">
+                        <img id="avatarPreview" src="https://placehold.co/300x400/f1f5f9/65a30d?text=3x4" class="w-full h-full object-cover">
                     </div>
-                    <div class="flex-1 space-y-1.5" onclick="event.stopPropagation()">
-                        <div class="flex flex-wrap gap-1.5">
-                            <button type="button" onclick="openAvatarStudio('member')" class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2 px-3 rounded-xl transition inline-flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-crop-simple"></i> Mở Xưởng Cắt Ảnh (3:4)
-                            </button>
-                            <label class="bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-800 font-bold text-xs py-2 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-upload"></i> Tải file ảnh
-                                <input type="file" id="memberAvatarFile" accept="image/*" onchange="handleMemberFileSelect(event)" class="hidden">
-                            </label>
-                        </div>
-                        <p class="text-[10px] text-slate-500 font-medium">Hình ảnh được xuất với tỷ lệ 3:4 (300x400 px) sắc nét.</p>
+                    <div class="flex-1 space-y-2">
+                        <label class="bg-lime-500 hover:bg-lime-400 active:scale-95 text-slate-950 font-black text-xs py-2.5 px-3 rounded-xl transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-camera"></i> Tải file ảnh 3x4 (Tự động)
+                            <input type="file" id="memberAvatarFile" accept="image/*" onchange="autoProcessAvatar3x4(event.target.files[0], 'member')" class="hidden">
+                        </label>
+                        <p class="text-[10px] text-slate-500 font-medium">Hệ thống sẽ tự động khớp khung 300x400 (3:4) chất lượng cao.</p>
                         <input type="text" id="memberAvatarUrl" oninput="updateAvatarPreview(this.value)" placeholder="Hoặc dán URL đường dẫn ảnh..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none font-medium">
                     </div>
                 </div>
@@ -664,7 +487,7 @@
                     <i class="fa-solid fa-user-shield text-lime-700 text-2xl"></i>
                 </div>
                 <h3 class="text-lg sm:text-xl font-black text-slate-900">Xác Thực Quản Trị Viên</h3>
-                <p class="text-xs text-slate-500 font-medium mt-1">Mật khẩu mặc định: <span class="font-mono text-lime-700 font-bold">215151365</span></p>
+                <p class="text-xs text-slate-500 font-medium mt-1">Nhập mật khẩu Admin để truy cập toàn bộ quyền tùy chỉnh bốc thăm & sơ đồ giải</p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div class="relative">
@@ -839,25 +662,6 @@
         let tempLogoDataUrl = "";
         let isAdminLoggedIn = false;
         let currentLoggedUser = null;
-        
-        // Smart Studio State
-        let cropperInstance = null;
-        let activeCropTarget = 'reg';
-        let activeFilter = 'none';
-        let activeFrame = 'none';
-        let webcamStream = null;
-        let flipX = 1;
-
-        const presetAvatars = [
-            "https://api.dicebear.com/7.x/bottts/svg?seed=EcoPickle1",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=ProSmash",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=CourtChamp",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=PaddleStar",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=KitchenMaster",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=EcoLeader",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=PickleGirl",
-            "https://api.dicebear.com/7.x/bottts/svg?seed=SpinMaster"
-        ];
 
         function customConfirm(title, message, onOk) {
             const modal = document.getElementById('confirmModal');
@@ -899,6 +703,57 @@
                 toast.classList.add('opacity-0');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        function autoProcessAvatar3x4(file, target) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast("Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, WebP)!", "error");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 300;
+                    canvas.height = 400;
+                    const ctx = canvas.getContext('2d');
+
+                    // Center-cover calculation for 3:4 aspect ratio
+                    const targetRatio = 300 / 400; // 0.75
+                    const imgRatio = img.width / img.height;
+                    let drawW, drawH, startX, startY;
+
+                    if (imgRatio > targetRatio) {
+                        drawH = img.height;
+                        drawW = img.height * targetRatio;
+                        startX = (img.width - drawW) / 2;
+                        startY = 0;
+                    } else {
+                        drawW = img.width;
+                        drawH = img.width / targetRatio;
+                        startX = 0;
+                        startY = (img.height - drawH) / 2;
+                    }
+
+                    ctx.drawImage(img, startX, startY, drawW, drawH, 0, 0, 300, 400);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.88);
+
+                    if (target === 'reg') {
+                        document.getElementById('regAvatar').value = base64;
+                        document.getElementById('regAvatarPreview').src = base64;
+                    } else if (target === 'member') {
+                        document.getElementById('memberAvatarUrl').value = base64;
+                        document.getElementById('avatarPreview').src = base64;
+                    }
+
+                    showToast("Đã tự động cân chỉnh ảnh 3x4 chuẩn sắc nét!");
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         async function initFirebase() {
@@ -979,217 +834,11 @@
                 } catch(e) {}
             }
 
-            setupDropzones();
-            setupClipboardPaste();
-            renderPresetAvatars();
             renderHeaderLogo();
             renderHeaderUserBadge();
             renderMembers();
             renderBracket();
-        }
-
-        function setupDropzones() {
-            ['regDropzone', 'memberDropzone'].forEach(dzId => {
-                const dz = document.getElementById(dzId);
-                if (!dz) return;
-
-                ['dragenter', 'dragover'].forEach(eventName => {
-                    dz.addEventListener(eventName, (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        dz.classList.add('border-lime-500', 'bg-lime-50/50');
-                    }, false);
-                });
-
-                ['dragleave', 'drop'].forEach(eventName => {
-                    dz.addEventListener(eventName, (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        dz.classList.remove('border-lime-500', 'bg-lime-50/50');
-                    }, false);
-                });
-
-                dz.addEventListener('drop', (e) => {
-                    const files = e.dataTransfer.files;
-                    if (files && files.length > 0) {
-                        const target = dzId === 'regDropzone' ? 'reg' : 'member';
-                        processAndOpenCropper(files[0], target);
-                    }
-                });
-            });
-        }
-
-        function setupClipboardPaste() {
-            document.addEventListener('paste', (e) => {
-                const cropModal = document.getElementById('cropModal');
-                const isCropVisible = cropModal && !cropModal.classList.contains('hidden');
-                
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                for (let index in items) {
-                    const item = items[index];
-                    if (item.kind === 'file' && item.type.startsWith('image/')) {
-                        const blob = item.getAsFile();
-                        processAndOpenCropper(blob, isCropVisible ? activeCropTarget : 'reg');
-                        showToast("Đã nhận hình ảnh từ bộ nhớ tạm Clipboard!");
-                        break;
-                    }
-                }
-            });
-        }
-
-        function renderPresetAvatars() {
-            const grid = document.getElementById('presetAvatarGrid');
-            if (!grid) return;
-            grid.innerHTML = presetAvatars.map(url => `
-                <button type="button" onclick="selectPresetAvatar('${url}')" class="w-14 h-14 rounded-2xl bg-slate-100 border-2 border-slate-200 hover:border-lime-500 overflow-hidden transition active:scale-95 shadow-xs">
-                    <img src="${url}" class="w-full h-full object-cover">
-                </button>
-            `).join('');
-        }
-
-        function selectPresetAvatar(url) {
-            if (activeCropTarget === 'reg') {
-                document.getElementById('regAvatar').value = url;
-                document.getElementById('regAvatarPreview').src = url;
-            } else if (activeCropTarget === 'member') {
-                document.getElementById('memberAvatarUrl').value = url;
-                document.getElementById('avatarPreview').src = url;
-                const badge = document.getElementById('avatarStagedBadge');
-                if (badge) badge.classList.remove('hidden');
-            }
-            closeCropperModal();
-            showToast("Đã chọn Avatar thể thao mẫu!");
-        }
-
-        function openAvatarStudio(target = 'reg') {
-            activeCropTarget = target;
-            const modal = document.getElementById('cropModal');
-            if (!modal) return;
-            
-            modal.classList.remove('hidden');
-
-            let currentSrc = '';
-            if (target === 'reg') {
-                const inputVal = document.getElementById('regAvatar')?.value;
-                const previewSrc = document.getElementById('regAvatarPreview')?.src;
-                currentSrc = inputVal || previewSrc || '';
-            } else {
-                const inputVal = document.getElementById('memberAvatarUrl')?.value;
-                const previewSrc = document.getElementById('avatarPreview')?.src;
-                currentSrc = inputVal || previewSrc || '';
-            }
-
-            if (currentSrc && !currentSrc.includes('placehold.co')) {
-                switchStudioTab('crop');
-                initCropperWithImage(currentSrc);
-            } else {
-                switchStudioTab('presets');
-                showToast("Chọn Avatar mẫu, chụp Live hoặc tải ảnh từ máy!");
-            }
-        }
-
-        function switchStudioTab(tab) {
-            ['crop', 'camera', 'filter', 'presets'].forEach(t => {
-                const panel = document.getElementById(`studioPanel${t.charAt(0).toUpperCase() + t.slice(1)}`);
-                const btn = document.getElementById(`studioTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
-                if (t === tab) {
-                    panel?.classList.remove('hidden');
-                    btn?.classList.add('bg-white', 'text-slate-900', 'shadow-xs');
-                    btn?.classList.remove('text-slate-600');
-                } else {
-                    panel?.classList.add('hidden');
-                    btn?.classList.remove('bg-white', 'text-slate-900', 'shadow-xs');
-                    btn?.classList.add('text-slate-600');
-                }
-            });
-
-            if (tab !== 'camera' && webcamStream) {
-                stopWebcam();
-            }
-        }
-
-        async function startWebcam() {
-            try {
-                const video = document.getElementById('webcamVideo');
-                const placeholder = document.getElementById('webcamPlaceholder');
-                
-                webcamStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 640, facingMode: 'user' } });
-                video.srcObject = webcamStream;
-                video.classList.remove('hidden');
-                placeholder?.classList.add('hidden');
-            } catch (err) {
-                console.error("Webcam error:", err);
-                showToast("Không thể truy cập camera thiết bị!", "error");
-            }
-        }
-
-        function stopWebcam() {
-            if (webcamStream) {
-                webcamStream.getTracks().forEach(track => track.stop());
-                webcamStream = null;
-            }
-            const video = document.getElementById('webcamVideo');
-            const placeholder = document.getElementById('webcamPlaceholder');
-            if (video) video.classList.add('hidden');
-            if (placeholder) placeholder.classList.remove('hidden');
-        }
-
-        function takeWebcamSnapshot() {
-            const video = document.getElementById('webcamVideo');
-            if (!webcamStream || video.classList.contains('hidden')) {
-                showToast("Vui lòng bật camera trước!", "error");
-                return;
-            }
-
-            const countdownEl = document.getElementById('cameraCountdown');
-            let count = 3;
-            countdownEl.innerText = count;
-            countdownEl.classList.remove('hidden');
-
-            const timer = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    countdownEl.innerText = count;
-                } else {
-                    clearInterval(timer);
-                    countdownEl.classList.add('hidden');
-
-                    const canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth || 640;
-                    canvas.height = video.videoHeight || 640;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.90);
-                    stopWebcam();
-
-                    initCropperWithImage(dataUrl);
-                    switchStudioTab('crop');
-                    showToast("Đã chụp ảnh selfie xong! Căn chỉnh góc thích hợp.");
-                }
-            }, 800);
-        }
-
-        function applyFilterPreset(filter) {
-            activeFilter = filter;
-            const wrapper = document.getElementById('cropperWrapper');
-            if (wrapper) {
-                wrapper.className = `md:col-span-2 relative w-full h-64 sm:h-72 bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-800 shadow-inner filter-${filter}`;
-            }
-            showToast(`Áp dụng bộ lọc: ${filter.toUpperCase()}`);
-        }
-
-        function applyFramePreset(frame) {
-            activeFrame = frame;
-            const circle = document.getElementById('frameOverlayCircle');
-
-            let frameClass = '';
-            if (frame === 'lime_ring') frameClass = 'border-4 border-lime-500 rounded-2xl ring-2 ring-lime-300';
-            else if (frame === 'gold_champ') frameClass = 'border-4 border-amber-400 rounded-2xl ring-2 ring-amber-200';
-            else if (frame === 'court_neon') frameClass = 'border-4 border-sky-400 rounded-2xl ring-2 ring-sky-200';
-
-            if (circle) circle.className = `absolute inset-0 pointer-events-none ${frameClass}`;
-            showToast("Đã cập nhật viền hiệu ứng 3:4!");
+            updateAdminUI();
         }
 
         function renderHeaderLogo() {
@@ -1199,189 +848,6 @@
                 container.innerHTML = `<img src="${clubLogoUrl}" class="w-full h-full object-cover">`;
             } else {
                 container.innerHTML = `<i class="fa-solid fa-table-tennis-paddle-ball text-brand-400 text-2xl animate-pulse"></i>`;
-            }
-        }
-
-        function handleRegFileSelect(e) {
-            const file = e.target.files && e.target.files[0];
-            if (file) {
-                processAndOpenCropper(file, 'reg');
-                e.target.value = '';
-            }
-        }
-
-        function handleMemberFileSelect(e) {
-            const file = e.target.files && e.target.files[0];
-            if (file) {
-                processAndOpenCropper(file, 'member');
-                e.target.value = '';
-            }
-        }
-
-        async function processAndOpenCropper(file, target) {
-            if (!file) return;
-            if (!file.type.startsWith('image/')) {
-                showToast("Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, WebP)!", "error");
-                return;
-            }
-
-            activeCropTarget = target;
-            flipX = 1;
-
-            const modal = document.getElementById('cropModal');
-            const spinner = document.getElementById('cropperLoadingSpinner');
-            
-            modal.classList.remove('hidden');
-            if (spinner) spinner.classList.remove('hidden');
-
-            try {
-                const imageBitmap = await createImageBitmap(file);
-                const MAX_DIM = 1200;
-                let width = imageBitmap.width;
-                let height = imageBitmap.height;
-
-                if (width > MAX_DIM || height > MAX_DIM) {
-                    if (width > height) {
-                        height = Math.round((height * MAX_DIM) / width);
-                        width = MAX_DIM;
-                    } else {
-                        width = Math.round((width * MAX_DIM) / height);
-                        height = MAX_DIM;
-                    }
-                }
-
-                const offCanvas = document.createElement('canvas');
-                offCanvas.width = width;
-                offCanvas.height = height;
-                const ctx = offCanvas.getContext('2d');
-                ctx.drawImage(imageBitmap, 0, 0, width, height);
-
-                const optimizedDataUrl = offCanvas.toDataURL('image/jpeg', 0.90);
-                initCropperWithImage(optimizedDataUrl);
-
-            } catch (err) {
-                console.error("Image processing error:", err);
-                if (spinner) spinner.classList.add('hidden');
-                showToast("Lỗi khi đọc file ảnh, vui lòng thử lại!", "error");
-            }
-        }
-
-        function initCropperWithImage(dataUrl) {
-            const cropperImg = document.getElementById('cropperImg');
-            const spinner = document.getElementById('cropperLoadingSpinner');
-
-            cropperImg.onload = function() {
-                if (cropperInstance) {
-                    cropperInstance.destroy();
-                }
-
-                cropperInstance = new Cropper(cropperImg, {
-                    aspectRatio: 3 / 4,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.90,
-                    responsive: true,
-                    checkOrientation: true,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                    preview: [
-                        document.getElementById('liveCropPreview34')
-                    ],
-                    ready() {
-                        if (spinner) spinner.classList.add('hidden');
-                    }
-                });
-            };
-            cropperImg.src = dataUrl;
-        }
-
-        function closeCropperModal() {
-            document.getElementById('cropModal').classList.add('hidden');
-            if (cropperInstance) {
-                cropperInstance.destroy();
-                cropperInstance = null;
-            }
-            stopWebcam();
-        }
-
-        function rotateCropper(deg) {
-            if (cropperInstance) cropperInstance.rotate(deg);
-        }
-
-        function flipCropperX() {
-            if (cropperInstance) {
-                flipX = -flipX;
-                cropperInstance.scaleX(flipX);
-            }
-        }
-
-        function zoomCropper(ratio) {
-            if (cropperInstance) cropperInstance.zoom(ratio);
-        }
-
-        function resetCropper() {
-            if (cropperInstance) cropperInstance.reset();
-        }
-
-        function applyCrop() {
-            if (!cropperInstance) return;
-
-            const croppedCanvas = cropperInstance.getCroppedCanvas({
-                width: 300,
-                height: 400,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            });
-
-            if (!croppedCanvas) return;
-
-            const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = 300;
-            finalCanvas.height = 400;
-            const ctx = finalCanvas.getContext('2d');
-
-            if (activeFilter === 'lime') ctx.filter = 'contrast(110%) brightness(105%) saturate(120%) hue-rotate(-15deg)';
-            else if (activeFilter === 'court') ctx.filter = 'contrast(115%) brightness(102%) saturate(130%) hue-rotate(180deg)';
-            else if (activeFilter === 'vivid') ctx.filter = 'contrast(125%) brightness(108%) saturate(150%)';
-            else if (activeFilter === 'gold') ctx.filter = 'contrast(105%) sepia(40%) saturate(140%) hue-rotate(5deg)';
-            else if (activeFilter === 'bw') ctx.filter = 'grayscale(100%) contrast(120%)';
-
-            ctx.drawImage(croppedCanvas, 0, 0, 300, 400);
-            ctx.filter = 'none';
-
-            if (activeFrame !== 'none') {
-                ctx.lineWidth = 12;
-                if (activeFrame === 'lime_ring') ctx.strokeStyle = '#84cc16';
-                else if (activeFrame === 'gold_champ') ctx.strokeStyle = '#f59e0b';
-                else if (activeFrame === 'court_neon') ctx.strokeStyle = '#0284c7';
-                ctx.strokeRect(0, 0, 300, 400);
-            }
-
-            const croppedBase64 = finalCanvas.toDataURL('image/jpeg', 0.88);
-
-            if (activeCropTarget === 'reg') {
-                document.getElementById('regAvatar').value = croppedBase64;
-                document.getElementById('regAvatarPreview').src = croppedBase64;
-            } else if (activeCropTarget === 'member') {
-                document.getElementById('memberAvatarUrl').value = croppedBase64;
-                document.getElementById('avatarPreview').src = croppedBase64;
-                const badge = document.getElementById('avatarStagedBadge');
-                if (badge) badge.classList.remove('hidden');
-            }
-
-            closeCropperModal();
-            showToast("Đã cắt & áp dụng ảnh đại diện chuẩn 3:4 (300x400)!");
-        }
-
-        function updateRegAvatarFromUrl(url) {
-            const preview = document.getElementById('regAvatarPreview');
-            if (preview && url) {
-                preview.src = url;
             }
         }
 
@@ -1418,14 +884,7 @@
                         ${isMe ? `<span class="absolute top-3 right-3 bg-lime-500 text-slate-950 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">Hồ sơ của bạn</span>` : ''}
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <div class="relative group/avatar cursor-pointer flex-shrink-0" onclick="${(isAdminLoggedIn || isMe) ? `editMember('${m.id}')` : ''}" title="${(isAdminLoggedIn || isMe) ? 'Đổi ảnh đại diện (300x400)' : ''}">
-                                    <img src="${m.avatar || 'https://placehold.co/300x400'}" onerror="this.src='https://placehold.co/300x400'" class="w-15 h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-sm aspect-[3/4]">
-                                    ${(isAdminLoggedIn || isMe) ? `
-                                        <div class="absolute inset-0 bg-slate-900/60 rounded-2xl flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition text-white text-xs">
-                                            <i class="fa-solid fa-crop-simple"></i>
-                                        </div>
-                                    ` : ''}
-                                </div>
+                                <img src="${m.avatar || 'https://placehold.co/300x400'}" onerror="this.src='https://placehold.co/300x400'" class="w-15 h-20 rounded-2xl object-cover border-2 border-slate-100 shadow-sm aspect-[3/4]">
                                 <div>
                                     <h4 class="font-extrabold text-slate-900 text-sm group-hover:text-lime-700 transition truncate max-w-[140px]">${m.name}</h4>
                                     <span class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${m.role || 'Thành viên'}</span>
@@ -1514,10 +973,14 @@
             const newId = Date.now().toString();
             const newMember = { id: newId, name, phone, password, rating, gender, hand, position, role: "Thành viên", avatar };
 
+            membersData.push(newMember);
+
             if (isAuthReady) {
-                await setDoc(doc(membersColRef, newId), newMember);
-            } else {
-                membersData.push(newMember);
+                try {
+                    await setDoc(doc(membersColRef, newId), newMember);
+                } catch (err) {
+                    console.error("Error registering member:", err);
+                }
             }
             currentLoggedUser = newMember;
             sessionStorage.setItem('ecohome_user_session', JSON.stringify(currentLoggedUser));
@@ -1587,8 +1050,6 @@
 
         function openMemberModal(member = null) {
             document.getElementById('memberModal').classList.remove('hidden');
-            const badge = document.getElementById('avatarStagedBadge');
-            if (badge) badge.classList.add('hidden');
 
             if (member) {
                 document.getElementById('memberModalTitle').innerText = "Cập Nhật Thành Viên";
@@ -1621,6 +1082,13 @@
             if(url) document.getElementById('avatarPreview').src = url;
         }
 
+        function updateRegAvatarFromUrl(url) {
+            const preview = document.getElementById('regAvatarPreview');
+            if (preview && url) {
+                preview.src = url;
+            }
+        }
+
         async function saveMember(e) {
             e.preventDefault();
             const id = document.getElementById('memberId').value || Date.now().toString();
@@ -1633,13 +1101,19 @@
 
             const memberObj = { id, name, rating, gender, phone, role, avatar };
 
-            if (isAuthReady) {
-                await setDoc(doc(membersColRef, id.toString()), memberObj);
+            const idx = membersData.findIndex(m => m.id.toString() === id.toString());
+            if (idx >= 0) {
+                membersData[idx] = { ...membersData[idx], ...memberObj };
             } else {
-                const idx = membersData.findIndex(m => m.id.toString() === id.toString());
-                if (idx >= 0) membersData[idx] = memberObj;
-                else membersData.push(memberObj);
-                renderMembers();
+                membersData.push(memberObj);
+            }
+
+            if (isAuthReady) {
+                try {
+                    await setDoc(doc(membersColRef, id.toString()), memberObj);
+                } catch (err) {
+                    console.error("Error saving member to Firestore:", err);
+                }
             }
 
             if (currentLoggedUser && currentLoggedUser.id.toString() === id.toString()) {
@@ -1648,7 +1122,8 @@
                 renderHeaderUserBadge();
             }
 
-            showToast("Đã lưu thông tin & avatar thành viên thành công!");
+            renderMembers();
+            showToast("Đã lưu thông tin thành viên thành công!");
             closeMemberModal();
         }
 
@@ -1658,12 +1133,20 @@
         }
 
         function deleteMember(id) {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền xóa thành viên!", "error");
+                return;
+            }
             customConfirm("Xóa thành viên", "Bạn có chắc chắn muốn xóa thành viên này khỏi danh sách CLB?", async () => {
+                membersData = membersData.filter(m => m.id.toString() !== id.toString());
+                renderMembers();
+
                 if (isAuthReady) {
-                    await deleteDoc(doc(membersColRef, id.toString()));
-                } else {
-                    membersData = membersData.filter(m => m.id.toString() !== id.toString());
-                    renderMembers();
+                    try {
+                        await deleteDoc(doc(membersColRef, id.toString()));
+                    } catch (err) {
+                        console.error("Error deleting member:", err);
+                    }
                 }
                 showToast("Đã xóa thành viên", "info");
             });
@@ -1678,7 +1161,7 @@
                 const label = document.createElement('label');
                 label.className = "flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 cursor-pointer hover:border-lime-500 transition text-xs font-bold text-slate-800 select-none shadow-sm";
                 label.innerHTML = `
-                    <input type="checkbox" value="${m.id}" checked onchange="updateSocialSelectedCount()" class="social-member-checkbox accent-lime-600 rounded">
+                    <input type="checkbox" value="${m.id}" checked onchange="updateSocialSelectedCount()" ${!isAdminLoggedIn ? 'disabled' : ''} class="social-member-checkbox accent-lime-600 rounded">
                     <span>${m.name}</span>
                     <span class="text-[10px] text-lime-700 font-mono">(${parseFloat(m.rating || 0).toFixed(1)})</span>
                     <span class="text-[9px] ${m.gender === 'Nữ' ? 'text-pink-500' : 'text-sky-500'}">(${m.gender})</span>
@@ -1695,11 +1178,20 @@
         }
 
         function selectAllMembersForSocial(select) {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền tùy chỉnh người chơi bốc thăm!", "error");
+                return;
+            }
             document.querySelectorAll('.social-member-checkbox').forEach(cb => cb.checked = select);
             updateSocialSelectedCount();
         }
 
         function generateRandomSocialMatches() {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền thực hiện bốc thăm ghép sân!", "error");
+                return;
+            }
+
             const checkboxes = document.querySelectorAll('.social-member-checkbox:checked');
             const selectedIds = Array.from(checkboxes).map(cb => cb.value.toString());
             let selectedPlayers = membersData.filter(m => selectedIds.includes(m.id.toString()));
@@ -1843,7 +1335,7 @@
                 const roundMatches = roundObj.matches || [];
                 roundMatches.forEach((match, matchIdx) => {
                     const matchCard = document.createElement('div');
-                    matchCard.className = "bracket-match bg-white border border-slate-200/90 rounded-2xl p-3.5 relative cursor-pointer shadow-sm";
+                    matchCard.className = `bracket-match bg-white border border-slate-200/90 rounded-2xl p-3.5 relative shadow-sm ${isAdminLoggedIn ? 'cursor-pointer' : ''}`;
                     
                     if (isAdminLoggedIn) {
                         matchCard.onclick = () => openScoreModal(roundIdx, matchIdx);
@@ -1895,6 +1387,11 @@
         }
 
         function openScoreModal(roundIdx, matchIdx) {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền cập nhật điểm số & sân đấu!", "error");
+                return;
+            }
+
             const match = tournamentBracket.rounds[roundIdx]?.matches?.[matchIdx];
             if (!match || !match.p1 || !match.p2 || match.p1 === '---' || match.p2 === '---') {
                 showToast("Chưa đủ 2 đội tham gia trận đấu này!", "error");
@@ -1918,6 +1415,11 @@
 
         async function saveMatchScore(e) {
             e.preventDefault();
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền lưu tỷ số!", "error");
+                return;
+            }
+
             const roundIdx = parseInt(document.getElementById('matchRoundIdx').value);
             const matchIdx = parseInt(document.getElementById('matchMatchIdx').value);
             const courtName = document.getElementById('matchCourtName').value.trim();
@@ -1948,7 +1450,11 @@
             }
 
             if (isAuthReady) {
-                await setDoc(bracketDocRef, tournamentBracket);
+                try {
+                    await setDoc(bracketDocRef, tournamentBracket);
+                } catch (err) {
+                    console.error("Error updating bracket:", err);
+                }
             } else {
                 renderBracket();
             }
@@ -1958,6 +1464,11 @@
         }
 
         function generateNewBracketModal() {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền tạo Sơ đồ giải đấu mới!", "error");
+                return;
+            }
+
             if (membersData.length < 4) {
                 showToast("Cần ít nhất 4 thành viên để tạo sơ đồ thi đấu!", "error");
                 return;
@@ -1996,7 +1507,11 @@
                 };
 
                 if (isAuthReady) {
-                    await setDoc(bracketDocRef, tournamentBracket);
+                    try {
+                        await setDoc(bracketDocRef, tournamentBracket);
+                    } catch (err) {
+                        console.error("Error creating new bracket:", err);
+                    }
                 } else {
                     renderBracket();
                 }
@@ -2098,7 +1613,7 @@
                 if (input) input.value = '';
                 showToast("Đăng nhập Admin thành công!");
             } else {
-                showToast("Sai mật khẩu Admin! (Mặc định: 215151365)", "error");
+                showToast("Sai mật khẩu Admin!", "error");
                 if (input) {
                     setTimeout(() => input.focus(), 300);
                 }
@@ -2112,6 +1627,11 @@
             const addMemberBtn = document.getElementById('addMemberBtn');
             const setupBracketBtn = document.getElementById('setupBracketBtn');
             const changeLogoBtn = document.getElementById('changeLogoBtn');
+            const socialControls = document.getElementById('socialDrawAdminControls');
+            const noticeBanner = document.getElementById('adminOnlyNoticeBanner');
+
+            // Inputs in social tab
+            const socialInputs = ['socialCourtCount', 'socialMatchType', 'socialRoundCount', 'socialCourtPrefix'];
 
             if (isAdminLoggedIn) {
                 adminBtn.className = "flex items-center gap-2 bg-lime-500 hover:bg-lime-400 text-slate-950 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-black border border-lime-400 transition shadow-sm";
@@ -2120,6 +1640,13 @@
                 addMemberBtn?.classList.remove('hidden');
                 setupBracketBtn?.classList.remove('hidden');
                 changeLogoBtn?.classList.remove('hidden');
+                socialControls?.classList.remove('hidden');
+                noticeBanner?.classList.add('hidden');
+
+                socialInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.removeAttribute('disabled');
+                });
             } else {
                 adminBtn.className = "flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-slate-800 transition shadow-sm";
                 adminIcon.className = "fa-solid fa-lock text-lime-400";
@@ -2127,12 +1654,24 @@
                 addMemberBtn?.classList.add('hidden');
                 setupBracketBtn?.classList.add('hidden');
                 changeLogoBtn?.classList.add('hidden');
+                socialControls?.classList.add('hidden');
+                noticeBanner?.classList.remove('hidden');
+
+                socialInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.setAttribute('disabled', 'true');
+                });
             }
             renderMembers();
             renderBracket();
+            renderSocialChecklist();
         }
 
         function openLogoModal() {
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền đổi Logo!", "error");
+                return;
+            }
             tempLogoDataUrl = clubLogoUrl || "";
             const modal = document.getElementById('logoModal');
             const urlInput = document.getElementById('logoUrlInput');
@@ -2218,6 +1757,10 @@
 
         async function saveClubLogo(e) {
             e.preventDefault();
+            if (!isAdminLoggedIn) {
+                showToast("Chỉ Admin mới có quyền đổi Logo!", "error");
+                return;
+            }
             const urlInputValue = document.getElementById('logoUrlInput').value.trim();
             const logoToSave = tempLogoDataUrl || urlInputValue || "";
 
@@ -2235,14 +1778,12 @@
             }
         }
 
-        // Keyboard navigation bindings
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const adminModal = document.getElementById('adminModal');
                 if (adminModal && !adminModal.classList.contains('pointer-events-none')) {
                     toggleModalAnimation('adminModal', false);
                 }
-                closeCropperModal();
                 closeLogoModal();
                 document.getElementById('userAuthModal')?.classList.add('hidden');
                 closeMemberModal();
@@ -2280,24 +1821,7 @@
         window.closeScoreModal = closeScoreModal;
         window.saveMatchScore = saveMatchScore;
         window.generateNewBracketModal = generateNewBracketModal;
-
-        // Studio & Cropper Bindings
-        window.openAvatarStudio = openAvatarStudio;
-        window.switchStudioTab = switchStudioTab;
-        window.startWebcam = startWebcam;
-        window.stopWebcam = stopWebcam;
-        window.takeWebcamSnapshot = takeWebcamSnapshot;
-        window.applyFilterPreset = applyFilterPreset;
-        window.applyFramePreset = applyFramePreset;
-        window.selectPresetAvatar = selectPresetAvatar;
-        window.handleRegFileSelect = handleRegFileSelect;
-        window.handleMemberFileSelect = handleMemberFileSelect;
-        window.closeCropperModal = closeCropperModal;
-        window.rotateCropper = rotateCropper;
-        window.flipCropperX = flipCropperX;
-        window.zoomCropper = zoomCropper;
-        window.resetCropper = resetCropper;
-        window.applyCrop = applyCrop;
+        window.autoProcessAvatar3x4 = autoProcessAvatar3x4;
         window.updateRegAvatarFromUrl = updateRegAvatarFromUrl;
 
         window.addEventListener('load', () => {
